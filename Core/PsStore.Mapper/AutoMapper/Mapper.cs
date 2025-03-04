@@ -59,3 +59,4 @@ namespace PsStore.Mapper.AutoMapper
             MapperContainer = config.CreateMapper();
         }
     }
+}
