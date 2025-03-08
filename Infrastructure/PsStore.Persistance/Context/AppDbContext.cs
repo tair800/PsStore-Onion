@@ -8,9 +8,12 @@ namespace PsStore.Persistance.Context
     public class AppDbContext : IdentityDbContext<User, Role, Guid>
     {
 
+        public AppDbContext()
+        {
 
+        }
 
-        public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+        public AppDbContext(DbContextOptions options) : base(options)
         {
 
         }
@@ -22,14 +25,6 @@ namespace PsStore.Persistance.Context
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-
-            modelBuilder.Entity<Category>()
-                .Property(c => c.Id)
-                .ValueGeneratedOnAdd(); // ✅ Ensures auto-increment
-
-            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
-
     }
 }

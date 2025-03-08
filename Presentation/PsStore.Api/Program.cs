@@ -1,10 +1,4 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using PsStore.Application;
-using PsStore.Infrastructure;
-using PsStore.Mapper;
-using PsStore.Persistance;
-using PsStore.Persistance.Context;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,14 +20,10 @@ builder.Configuration
     .AddJsonFile("appsettings.json", optional: false)
     .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
 
-builder.Services.AddPersistance(builder.Configuration);
-builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplication();
-builder.Services.AddCustomMapper();
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
+//builder.Services.AddPersistance(builder.Configuration);
+//builder.Services.AddInfrastructure(builder.Configuration);
+//builder.Services.AddApplication();
+//builder.Services.AddCustomMapper();
 
 builder.Services.AddSwaggerGen(c =>
 {
