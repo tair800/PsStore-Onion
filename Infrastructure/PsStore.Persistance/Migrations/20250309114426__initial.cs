@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PsStore.Persistance.Migrations
 {
     /// <inheritdoc />
-    public partial class intial : Migration
+    public partial class _initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -185,6 +185,7 @@ namespace PsStore.Persistance.Migrations
                     SalePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     ImgUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
+                    Platform = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -194,6 +195,58 @@ namespace PsStore.Persistance.Migrations
                         name: "FK_Games_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Dlc",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    GameId = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Dlc", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Dlc_Games_GameId",
+                        column: x => x.GameId,
+                        principalTable: "Games",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rating",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    GameId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId1 = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rating", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Rating_AspNetUsers_UserId1",
+                        column: x => x.UserId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Rating_Games_GameId",
+                        column: x => x.GameId,
+                        principalTable: "Games",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -238,9 +291,24 @@ namespace PsStore.Persistance.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Dlc_GameId",
+                table: "Dlc",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Games_CategoryId",
                 table: "Games",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rating_GameId",
+                table: "Rating",
+                column: "GameId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rating_UserId1",
+                table: "Rating",
+                column: "UserId1");
         }
 
         /// <inheritdoc />
@@ -262,13 +330,19 @@ namespace PsStore.Persistance.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Games");
+                name: "Dlc");
+
+            migrationBuilder.DropTable(
+                name: "Rating");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Games");
 
             migrationBuilder.DropTable(
                 name: "Categories");

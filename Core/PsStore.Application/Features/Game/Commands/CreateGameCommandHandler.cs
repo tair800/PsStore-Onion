@@ -31,7 +31,7 @@ namespace PsStore.Application.Features.Game.Commands
                 throw new Exception("Invalid PlatformId. The specified platform does not exist.");
             }
 
-            var category = await _unitOfWork.GetReadRepository<Category>()
+            var category = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
                 .GetAsync(c => c.Id == request.CategoryId);
             if (category == null)
             {

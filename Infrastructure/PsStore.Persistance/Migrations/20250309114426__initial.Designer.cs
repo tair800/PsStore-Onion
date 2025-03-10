@@ -12,8 +12,8 @@ using PsStore.Persistance.Context;
 namespace PsStore.Persistance.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250307134355_intial")]
-    partial class intial
+    [Migration("20250309114426__initial")]
+    partial class _initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -148,6 +148,38 @@ namespace PsStore.Persistance.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("PsStore.Domain.Entities.Dlc", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.ToTable("Dlc");
+                });
+
             modelBuilder.Entity("PsStore.Domain.Entities.Game", b =>
                 {
                     b.Property<int>("Id")
@@ -170,6 +202,9 @@ namespace PsStore.Persistance.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Platform")
+                        .HasColumnType("int");
+
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
@@ -185,6 +220,39 @@ namespace PsStore.Persistance.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Games");
+                });
+
+            modelBuilder.Entity("PsStore.Domain.Entities.Rating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("GameId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId1")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GameId");
+
+                    b.HasIndex("UserId1");
+
+                    b.ToTable("Rating");
                 });
 
             modelBuilder.Entity("PsStore.Domain.Entities.Role", b =>
@@ -342,6 +410,17 @@ namespace PsStore.Persistance.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("PsStore.Domain.Entities.Dlc", b =>
+                {
+                    b.HasOne("PsStore.Domain.Entities.Game", "Game")
+                        .WithMany("Dlcs")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
             modelBuilder.Entity("PsStore.Domain.Entities.Game", b =>
                 {
                     b.HasOne("PsStore.Domain.Entities.Category", "Category")
@@ -353,9 +432,35 @@ namespace PsStore.Persistance.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("PsStore.Domain.Entities.Rating", b =>
+                {
+                    b.HasOne("PsStore.Domain.Entities.Game", "Game")
+                        .WithMany("Ratings")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PsStore.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId1")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PsStore.Domain.Entities.Category", b =>
                 {
                     b.Navigation("Games");
+                });
+
+            modelBuilder.Entity("PsStore.Domain.Entities.Game", b =>
+                {
+                    b.Navigation("Dlcs");
+
+                    b.Navigation("Ratings");
                 });
 #pragma warning restore 612, 618
         }
