@@ -4,7 +4,7 @@ namespace PsStore.Application.Exceptions
 {
     public class ExceptionModel : ErrorStatusCode
     {
-        public IEnumerable<string> Errors { get; set; }
+        public List<string> Errors { get; set; } = new();
 
         public override string ToString()
         {

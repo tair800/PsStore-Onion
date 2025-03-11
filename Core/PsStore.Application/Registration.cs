@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PsStore.Application.Bases;
 using PsStore.Application.Behaviors;
 using PsStore.Application.Exceptions;
+using PsStore.Application.Features.Game.Commands;
 using System.Reflection;
 
 namespace PsStore.Application
@@ -20,6 +21,7 @@ namespace PsStore.Application
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
 
 
+            services.AddValidatorsFromAssemblyContaining<CreateGameCommandValidator>();
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(FluentValidationBehavior<,>));
         }
 

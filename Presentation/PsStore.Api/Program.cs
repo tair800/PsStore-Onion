@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PsStore.Application;
+using PsStore.Application.Exceptions;
 using PsStore.Infrastructure;
 using PsStore.Mapper;
 using PsStore.Persistance;
@@ -67,6 +68,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 
+app.UseMiddleware<ExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

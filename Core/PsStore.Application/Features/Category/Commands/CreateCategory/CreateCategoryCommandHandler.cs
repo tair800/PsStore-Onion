@@ -18,13 +18,14 @@ namespace PsStore.Application.Features.Category.Commands
 
         public async Task<Unit> Handle(CreateCategoryCommandRequest request, CancellationToken cancellationToken)
         {
-            // Check if category already exists
-            var existingCategory = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
-       .GetAsync(c => c.Name.Trim().ToLower() == request.Name.Trim().ToLower());
 
-            if (existingCategory != null)
+            bool isDuplicate = await _unitOfWork
+       .GetReadRepository<Domain.Entities.Category>()
+       .AnyAsync(c => c.Name == request.Name);
+
+            if (isDuplicate)
             {
-                throw new Exception("Category with the same name already exists.");
+                throw new InvalidOperationException("A category with this name already exists.");
             }
 
             // Create new category entity

@@ -22,20 +22,40 @@ namespace PsStore.Application.Features.Game.Commands
 
         public async Task<Unit> Handle(CreateGameCommandRequest request, CancellationToken cancellationToken)
         {
-            IList<Domain.Entities.Game> games = await _unitOfWork.GetReadRepository<Domain.Entities.Game>().GetAllAsync();
-
-            await _gameRules.GameTitleMustNotBeSame(games, request.Title);
+            var existingGame = await _unitOfWork.GetReadRepository<Domain.Entities.Game>()
+                .AnyAsync(g => g.Title == request.Title);
+            if (existingGame)
+            {
+                throw new InvalidOperationException("A game with this title already exists.");
+            }
 
             if (!Enum.IsDefined(typeof(Platform), request.PlatformId))
             {
-                throw new Exception("Invalid PlatformId. The specified platform does not exist.");
+                throw new InvalidOperationException("Invalid PlatformId. The specified platform does not exist.");
+            }
+            var platformEnum = (Platform)request.PlatformId;
+
+            var categoryExists = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
+                .AnyAsync(c => c.Id == request.CategoryId);
+            if (!categoryExists)
+            {
+                throw new InvalidOperationException("Invalid CategoryId. The specified category does not exist.");
             }
 
-            var category = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
-                .GetAsync(c => c.Id == request.CategoryId);
-            if (category == null)
+            List<Domain.Entities.Dlc> dlcs = new();
+            if (request.DlcIds.Any())
             {
-                throw new Exception("Invalid CategoryId. The specified category does not exist.");
+                dlcs = (await _unitOfWork.GetReadRepository<Domain.Entities.Dlc>()
+                    .GetAllAsync(d => request.DlcIds.Contains(d.Id)))
+                    .ToList();
+            }
+
+            List<Rating> ratings = new();
+            if (request.RatingIds.Any())
+            {
+                ratings = (await _unitOfWork.GetReadRepository<Rating>()
+                    .GetAllAsync(r => request.RatingIds.Contains(r.Id)))
+                    .ToList();
             }
 
             Domain.Entities.Game game = new()
@@ -45,36 +65,14 @@ namespace PsStore.Application.Features.Game.Commands
                 Price = request.Price,
                 SalePrice = request.SalePrice ?? 0,
                 ImgUrl = request.ImgUrl,
-                Category = category,
-                Platform = (Platform)request.PlatformId,
-                Dlcs = new List<Dlc>(),
-                Ratings = new List<Rating>()
+                CategoryId = request.CategoryId,
+                Platform = platformEnum,
+                Dlcs = dlcs,
+                Ratings = ratings
             };
 
             await _unitOfWork.GetWriteRepository<Domain.Entities.Game>().AddAsync(game);
-
-            if (await _unitOfWork.SaveAsync() > 0)
-            {
-                var dlcs = await _unitOfWork.GetReadRepository<Dlc>().GetAllAsync(d => d.GameId == game.Id);
-                if (dlcs.Any())
-                {
-                    foreach (var dlc in dlcs)
-                    {
-                        game.Dlcs.Add(dlc);
-                    }
-                }
-
-                var ratings = await _unitOfWork.GetReadRepository<Rating>().GetAllAsync(r => r.GameId == game.Id);
-                if (ratings.Any())
-                {
-                    foreach (var rating in ratings)
-                    {
-                        game.Ratings.Add(rating);
-                    }
-                }
-
-                await _unitOfWork.SaveAsync();
-            }
+            await _unitOfWork.SaveAsync();
 
             return Unit.Value;
         }
