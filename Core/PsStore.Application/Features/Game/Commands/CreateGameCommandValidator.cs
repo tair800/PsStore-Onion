@@ -17,9 +17,6 @@ namespace PsStore.Application.Features.Game.Commands
             RuleFor(x => x.Price)
                 .GreaterThan(0).WithMessage("Price must be greater than zero.");
 
-            RuleFor(x => x.SalePrice)
-                .GreaterThan(0).When(x => x.SalePrice.HasValue)
-                .WithMessage("Sale price must be greater than zero.");
 
             RuleFor(x => x.ImgUrl)
                 .NotEmpty().WithMessage("Image URL is required.")

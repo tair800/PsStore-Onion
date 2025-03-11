@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 using SendGrid.Helpers.Errors.Model;
 
 namespace PsStore.Application.Exceptions
@@ -14,47 +15,42 @@ namespace PsStore.Application.Exceptions
             }
             catch (Exception ex)
             {
-
-                await HandleexceptionAsync(httpContext, ex);
+                await HandleExceptionAsync(httpContext, ex);
             }
         }
 
-        private static Task HandleexceptionAsync(HttpContext httpContext, Exception exception)
+        private static Task HandleExceptionAsync(HttpContext httpContext, Exception exception)
         {
             int statusCode = GetStatusCode(exception);
             httpContext.Response.ContentType = "application/json";
             httpContext.Response.StatusCode = statusCode;
 
-            if (exception.GetType() == typeof(ValidationException))
+            var response = new ExceptionModel
             {
-                return httpContext.Response.WriteAsync(new ExceptionModel
-                {
-                    Errors = ((ValidationException)exception).Errors.Select(x => x.ErrorMessage),
-                    StatusCode = StatusCodes.Status400BadRequest
-                }.ToString());
-            }
-
-            List<string> errors = new()
-            {
-                $"Error message : {exception.Message}",
+                StatusCode = statusCode
             };
 
-            return httpContext.Response.WriteAsync(new ExceptionModel
+            if (exception is ValidationException validationException)
             {
-                Errors = errors,
-                StatusCode = statusCode
-            }.ToString());
+                response.Errors = validationException.Errors
+                    .Select(e => $"{e.PropertyName}: {e.ErrorMessage}") // ✅ Include property names
+                    .ToList();
+            }
+            else
+            {
+                response.Errors.Add($"Error Message: {exception.Message}"); // ✅ Now works since `Errors` is initialized
+            }
+
+            return httpContext.Response.WriteAsync(JsonConvert.SerializeObject(response));
         }
 
         private static int GetStatusCode(Exception exception) =>
             exception switch
             {
                 BadRequestException => StatusCodes.Status400BadRequest,
-                NotFoundException => StatusCodes.Status400BadRequest,
+                NotFoundException => StatusCodes.Status404NotFound, // ✅ Fixed NotFound to return 404
                 ValidationException => StatusCodes.Status422UnprocessableEntity,
                 _ => StatusCodes.Status500InternalServerError
-
             };
     }
-
 }
