@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PsStore.Application.Interfaces.Repositories;
 using PsStore.Domain.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PsStore.Infrastructure.Repositories
 {
@@ -19,6 +14,7 @@ namespace PsStore.Infrastructure.Repositories
         }
 
         private DbSet<T> Table { get => dbContext.Set<T>(); }
+
         public async Task AddAsync(T entity)
         {
             await Table.AddAsync(entity);
@@ -29,20 +25,37 @@ namespace PsStore.Infrastructure.Repositories
             await Table.AddRangeAsync(entities);
         }
 
+        public async Task<T> UpdateAsync(T entity)
+        {
+            entity.UpdatedDate = DateTime.UtcNow;
+            await Task.Run(() => Table.Update(entity));
+            return entity;
+        }
+
         public async Task HardDeleteAsync(T entity)
         {
             await Task.Run(() => Table.Remove(entity));
         }
 
-        public async Task HardDeleteRangeAsync(IList<T> entity)
+        public async Task HardDeleteRangeAsync(IList<T> entities)
         {
-            await Task.Run(() => Table.RemoveRange(entity));
+            await Task.Run(() => Table.RemoveRange(entities));
         }
 
-        public async Task<T> UpdateAsync(T entity)
+        public async Task SoftDeleteAsync(T entity)
         {
-            await Task.Run(() => Table.Update(entity));
-            return entity;
+            entity.IsDeleted = true;
+            entity.UpdatedDate = DateTime.UtcNow;
+            Table.Update(entity);
+            await dbContext.SaveChangesAsync();
+        }
+
+        public async Task RestoreAsync(T entity)
+        {
+            entity.IsDeleted = false;
+            entity.UpdatedDate = DateTime.UtcNow;
+            Table.Update(entity);
+            await dbContext.SaveChangesAsync();
         }
     }
 }

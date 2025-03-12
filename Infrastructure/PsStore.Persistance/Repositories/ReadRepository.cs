@@ -8,70 +8,128 @@ namespace PsStore.Infrastructure.Repositories
 {
     public class ReadRepository<T> : IReadRepository<T> where T : class, IEntityBase, new()
     {
-        private readonly DbContext dbContext;
+        private readonly DbContext _dbContext;
+        private DbSet<T> Table => _dbContext.Set<T>();
 
         public ReadRepository(DbContext dbContext)
         {
-            this.dbContext = dbContext;
+            _dbContext = dbContext;
         }
 
-
-
-        private DbSet<T> Table { get => dbContext.Set<T>(); }
-
-        public async Task<IList<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, bool enableTracking = false)
+        public async Task<IList<T>> GetAllAsync(Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            bool enableTracking = false, bool includeDeleted = false)
         {
-            IQueryable<T> queryable = Table;
-            if (!enableTracking) queryable = queryable.AsNoTracking();
-            if (include is not null) queryable = include(queryable);
-            if (predicate is not null) queryable = queryable.Where(predicate);
-            if (orderBy is not null)
+            IQueryable<T> queryable = Table.AsQueryable();
+
+            if (!includeDeleted)
+            {
+                queryable = queryable.Where(e => !e.IsDeleted);
+            }
+
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+
+            if (include != null)
+                queryable = include(queryable);
+
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+
+            if (orderBy != null)
                 return await orderBy(queryable).ToListAsync();
 
             return await queryable.ToListAsync();
         }
 
-        public async Task<IList<T>> GetAllByPagingAsync(Expression<Func<T, bool>>? predicate = null, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, bool enableTracking = false, int currentPage = 1, int pageSize = 3)
+        public async Task<IList<T>> GetAllByPagingAsync(Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            bool enableTracking = false, bool includeDeleted = false, int currentPage = 1, int pageSize = 3)
         {
-            IQueryable<T> queryable = Table;
-            if (!enableTracking) queryable = queryable.AsNoTracking();
-            if (include is not null) queryable = include(queryable);
-            if (predicate is not null) queryable = queryable.Where(predicate);
-            if (orderBy is not null)
-                return await orderBy(queryable).Skip((currentPage - 1) * pageSize).Take(pageSize).ToListAsync();
+            IQueryable<T> queryable = Table.AsQueryable();
+
+            if (!includeDeleted)
+            {
+                queryable = queryable.Where(e => !e.IsDeleted);
+            }
+
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+
+            if (include != null)
+                queryable = include(queryable);
+
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+
+            if (orderBy != null)
+                queryable = orderBy(queryable);
 
             return await queryable.Skip((currentPage - 1) * pageSize).Take(pageSize).ToListAsync();
         }
 
-        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate, Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null, bool enableTracking = false)
+        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate,
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            bool enableTracking = false, bool includeDeleted = false)
         {
-            IQueryable<T> queryable = Table;
-            if (!enableTracking) queryable = queryable.AsNoTracking();
-            if (include is not null) queryable = include(queryable);
+            IQueryable<T> queryable = Table.AsQueryable();
 
-            //queryable.Where(predicate);
+            if (!includeDeleted)
+            {
+                queryable = queryable.Where(e => !e.IsDeleted);
+            }
 
-            return await queryable.FirstOrDefaultAsync();
-        }
-        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
-        {
-            Table.AsNoTracking();
-            if (predicate is not null) Table.Where(predicate);
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
 
-            return await Table.CountAsync();
-        }
+            if (include != null)
+                queryable = include(queryable);
 
-        public IQueryable<T> Find(Expression<Func<T, bool>> predicate, bool enableTracking = false)
-        {
-            if (!enableTracking) Table.AsNoTracking();
-            return Table.Where(predicate);
+            return await queryable.FirstOrDefaultAsync(predicate);
         }
 
-        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null, bool includeDeleted = false)
         {
-            return await dbContext.Set<T>().AnyAsync(predicate);
+            IQueryable<T> queryable = Table.AsQueryable();
+
+            if (!includeDeleted)
+            {
+                queryable = queryable.Where(e => !e.IsDeleted);
+            }
+
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+
+            return await queryable.CountAsync();
         }
 
+        public IQueryable<T> Find(Expression<Func<T, bool>> predicate, bool enableTracking = false, bool includeDeleted = false)
+        {
+            IQueryable<T> queryable = Table.AsQueryable();
 
+            if (!includeDeleted)
+            {
+                queryable = queryable.Where(e => !e.IsDeleted);
+            }
+
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+
+            return queryable.Where(predicate);
+        }
+
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, bool includeDeleted = false)
+        {
+            IQueryable<T> queryable = Table.AsQueryable();
+
+            if (!includeDeleted)
+            {
+                queryable = queryable.Where(e => !e.IsDeleted);
+            }
+
+            return await queryable.AnyAsync(predicate);
+        }
     }
 }
