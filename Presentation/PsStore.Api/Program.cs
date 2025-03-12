@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PsStore.Application;
 using PsStore.Application.Exceptions;
+using PsStore.Application.Features.Dlc.Rules;
+using PsStore.Application.Features.Game.Rules;
 using PsStore.Infrastructure;
 using PsStore.Mapper;
 using PsStore.Persistance;
@@ -35,6 +37,8 @@ builder.Services.AddCustomMapper();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<GameRules>();
+builder.Services.AddScoped<DlcRules>();
 
 builder.Services.AddSwaggerGen(c =>
 {
