@@ -25,6 +25,12 @@ namespace PsStore.Api.Controllers
             return CreatedAtAction(nameof(Create), new { id = result }, new { message = "DLC created successfully." });
         }
 
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] UpdateDlcCommandRequest request)
+        {
+            await _mediator.Send(request);
+            return Ok(new { message = "DLC updated successfully." });
+        }
 
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)

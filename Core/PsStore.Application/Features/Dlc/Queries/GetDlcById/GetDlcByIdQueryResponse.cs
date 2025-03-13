@@ -1,4 +1,7 @@
-﻿namespace PsStore.Application.Features.Dlc.Queries.GetDlcById
+﻿using PsStore.Application.Common;
+using System.Text.Json.Serialization;
+
+namespace PsStore.Application.Features.Dlc.Queries.GetDlcById
 {
     public class GetDlcByIdQueryResponse
     {
@@ -11,5 +14,11 @@
         public int GameId { get; set; }
         public string GameTitle { get; set; }
         public bool IsDeleted { get; set; }
+
+        [JsonConverter(typeof(JsonDateTimeConverter))]
+        public DateTime CreatedDate { get; set; }
+
+        [JsonConverter(typeof(NullableJsonDateTimeConverter))]
+        public DateTime? UpdatedDate { get; set; }
     }
 }
