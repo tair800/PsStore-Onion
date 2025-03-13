@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PsStore.Application.Features.Dlc.Commands;
 using PsStore.Application.Features.Dlc.Commands.CreateDlc;
-using PsStore.Application.Features.Dlc.Queries;
+using PsStore.Application.Features.Dlc.Queries.GetAllDlc;
 
 namespace PsStore.Api.Controllers
 {
@@ -25,32 +25,28 @@ namespace PsStore.Api.Controllers
         }
 
 
-        [HttpDelete("{id}")]
+        [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
             await _mediator.Send(new DeleteDlcCommandRequest { Id = id });
             return Ok(new { message = "DLC deleted successfully." });
         }
 
-        [HttpPost("restore/{id}")]
+        [HttpPost]
         public async Task<IActionResult> Restore(int id)
         {
             await _mediator.Send(new RestoreDlcCommandRequest { Id = id });
             return Ok(new { message = "DLC restored successfully." });
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
-        {
-            var dlc = await _mediator.Send(new GetDlcByIdQuery { Id = id });
-            return Ok(dlc);
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
-            var dlcs = await _mediator.Send(new GetAllDlcsQuery { IncludeDeleted = includeDeleted });
+            var dlcs = await _mediator.Send(new GetAllDlcQueryRequest { IncludeDeleted = includeDeleted });
             return Ok(dlcs);
         }
+
+
+
     }
 }
