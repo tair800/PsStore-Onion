@@ -6,6 +6,8 @@ using PsStore.Application.Features.Dlc.Rules;
 using PsStore.Application.Features.Game.Rules;
 using PsStore.Infrastructure;
 using PsStore.Mapper;
+using PsStore.Mapper.AutoMapper;
+using PsStore.Mapper.AutoMapper.Profiles;
 using PsStore.Persistance;
 using PsStore.Persistance.Context;
 
@@ -23,6 +25,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 var env = builder.Environment;
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+// Now register your custom mapper wrapper
+builder.Services.AddSingleton<PsStore.Application.Interfaces.AutoMapper.IMapper, Mapper>();
 
 builder.Configuration
     .SetBasePath(env.ContentRootPath)
@@ -70,6 +77,8 @@ builder.Services.AddSwaggerGen(c =>
 
 
 var app = builder.Build();
+
+
 
 
 app.UseMiddleware<ExceptionMiddleware>();
