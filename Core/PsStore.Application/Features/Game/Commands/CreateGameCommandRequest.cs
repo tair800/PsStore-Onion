@@ -14,6 +14,6 @@ namespace PsStore.Application.Features.Game.Commands
 
         public List<int> DlcIds { get; set; } = new();
 
-        public List<int> RatingIds { get; set; } = new();
+        //public List<int> RatingIds { get; set; } = new();
     }
 }

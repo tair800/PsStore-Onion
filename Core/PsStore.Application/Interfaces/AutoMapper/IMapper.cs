@@ -7,5 +7,8 @@
 
         TDestination Map<TDestination, TSource>(TSource source);
         IList<TDestination> Map<TDestination, TSource>(IList<TSource> source);
+
+        void Map<TSource, TDestination>(TSource source, TDestination destination);
+
     }
 }

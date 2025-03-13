@@ -23,5 +23,10 @@ namespace PsStore.Mapper.AutoMapper
 
         public IList<TDestination> Map<TDestination, TSource>(IList<TSource> source)
             => _mapper.Map<IList<TDestination>>(source);
+
+        public void Map<TSource, TDestination>(TSource source, TDestination destination)
+            =>
+               _mapper.Map(source, destination);
+
     }
 }

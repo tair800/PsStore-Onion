@@ -50,13 +50,13 @@ namespace PsStore.Application.Features.Game.Commands
                     .ToList();
             }
 
-            List<Rating> ratings = new();
-            if (request.RatingIds.Any())
-            {
-                ratings = (await _unitOfWork.GetReadRepository<Rating>()
-                    .GetAllAsync(r => request.RatingIds.Contains(r.Id)))
-                    .ToList();
-            }
+            //List<Rating> ratings = new();
+            //if (request.RatingIds.Any())
+            //{
+            //    ratings = (await _unitOfWork.GetReadRepository<Rating>()
+            //        .GetAllAsync(r => request.RatingIds.Contains(r.Id)))
+            //        .ToList();
+            //}
 
             Domain.Entities.Game game = new()
             {
@@ -68,7 +68,7 @@ namespace PsStore.Application.Features.Game.Commands
                 CategoryId = request.CategoryId,
                 Platform = platformEnum,
                 Dlcs = dlcs,
-                Ratings = ratings
+                //Ratings = ratings
             };
 
             await _unitOfWork.GetWriteRepository<Domain.Entities.Game>().AddAsync(game);

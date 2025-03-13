@@ -18,9 +18,9 @@ namespace PsStore.Application.Features.Game.Commands
                 .GreaterThan(0).WithMessage("Price must be greater than zero.");
 
 
-            RuleFor(x => x.ImgUrl)
-                .NotEmpty().WithMessage("Image URL is required.")
-                .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _)).WithMessage("Invalid image URL format.");
+            //RuleFor(x => x.ImgUrl)
+            //    .NotEmpty().WithMessage("Image URL is required.")
+            //    .Must(url => Uri.TryCreate(url, UriKind.Absolute, out _)).WithMessage("Invalid image URL format.");
 
             RuleFor(x => x.CategoryId)
                 .GreaterThan(0).WithMessage("Invalid CategoryId.");

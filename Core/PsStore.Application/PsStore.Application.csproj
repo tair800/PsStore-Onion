@@ -20,4 +20,8 @@
     <ProjectReference Include="..\PsStore.Domain\PsStore.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Category\Commands\DeleteCategory\" />
+  </ItemGroup>
+
 </Project>
