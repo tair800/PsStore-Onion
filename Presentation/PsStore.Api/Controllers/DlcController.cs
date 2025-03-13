@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PsStore.Application.Features.Dlc.Commands;
 using PsStore.Application.Features.Dlc.Commands.CreateDlc;
 using PsStore.Application.Features.Dlc.Queries.GetAllDlc;
+using PsStore.Application.Features.Dlc.Queries.GetDlcById;
 
 namespace PsStore.Api.Controllers
 {
@@ -46,7 +47,12 @@ namespace PsStore.Api.Controllers
             return Ok(dlcs);
         }
 
-
+        [HttpGet]
+        public async Task<IActionResult> Get(int id, [FromQuery] bool includeDeleted = false)
+        {
+            var dlc = await _mediator.Send(new GetDlcByIdQueryRequest { Id = id, IncludeDeleted = includeDeleted });
+            return Ok(dlc);
+        }
 
     }
 }
