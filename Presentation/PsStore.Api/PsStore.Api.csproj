@@ -11,13 +11,15 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 
-  <ItemGroup>
-	  <ProjectReference Include="..\..\Core\PsStore.Mapper\PsStore.Mapper.csproj" />
-	  <ProjectReference Include="..\..\Infrastructure\PsStore.Infrastructure\PsStore.Infrastructure.csproj" />
-	  <ProjectReference Include="..\..\Infrastructure\PsStore.Persistance\PsStore.Persistance.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\Core\PsStore.Application\PsStore.Application.csproj" />
+		<ProjectReference Include="..\..\Infrastructure\PsStore.Infrastructure\PsStore.Infrastructure.csproj" />
+		<ProjectReference Include="..\..\Infrastructure\PsStore.Persistance\PsStore.Persistance.csproj" />
+		<ProjectReference Include="..\..\Core\PsStore.Mapper\PsStore.Mapper.csproj" />
+	</ItemGroup>
 
 </Project>
