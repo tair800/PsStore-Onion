@@ -6,6 +6,6 @@ namespace PsStore.Application.Features.Category.Commands.UpdateCategory
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string Description { get; set; }
+        public List<int> GameIds { get; set; } = new();
     }
 }

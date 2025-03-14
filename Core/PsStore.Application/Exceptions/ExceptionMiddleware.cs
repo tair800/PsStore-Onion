@@ -1,12 +1,28 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using SendGrid.Helpers.Errors.Model;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting; // ✅ Correct namespace for IHostEnvironment
+using Microsoft.Extensions.Logging;
+using PsStore.Application.Features.Category.Exceptions;
+using PsStore.Application.Interfaces.Services;
+using System.Text.Json;
 
 namespace PsStore.Application.Exceptions
 {
     public class ExceptionMiddleware : IMiddleware
     {
+        private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IErrorLoggingService _errorLoggingService;
+        private readonly IHostEnvironment _env; // ✅ Using IHostEnvironment instead of IWebHostEnvironment
+
+        public ExceptionMiddleware(
+            ILogger<ExceptionMiddleware> logger,
+            IErrorLoggingService errorLoggingService,
+            IHostEnvironment env)  // ✅ Changed IWebHostEnvironment to IHostEnvironment
+        {
+            _logger = logger;
+            _errorLoggingService = errorLoggingService;
+            _env = env;
+        }
+
         public async Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
         {
             try
@@ -15,42 +31,41 @@ namespace PsStore.Application.Exceptions
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while processing request {Path}", httpContext.Request.Path);
+                await _errorLoggingService.LogErrorToDatabase(httpContext, ex);
                 await HandleExceptionAsync(httpContext, ex);
             }
         }
 
-        private static Task HandleExceptionAsync(HttpContext httpContext, Exception exception)
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            int statusCode = GetStatusCode(exception);
-            httpContext.Response.ContentType = "application/json";
-            httpContext.Response.StatusCode = statusCode;
+            int statusCode = StatusCodes.Status500InternalServerError;
+            string errorCode = "INTERNAL_ERROR"; // Default error code
 
-            var response = new ExceptionModel
+            if (exception is CategoryNotFoundException)
             {
-                StatusCode = statusCode
+                statusCode = StatusCodes.Status404NotFound;
+                errorCode = "CATEGORY_NOT_FOUND";
+            }
+
+            var response = new
+            {
+                success = false,
+                errorCode,
+                message = exception.Message,
+                statusCode,
+                timestamp = DateTime.UtcNow,
+                stackTrace = _env.IsDevelopment() ? exception.StackTrace : null  // ✅ Add stackTrace only in Development
             };
 
-            if (exception is ValidationException validationException)
-            {
-                response.Errors = validationException.Errors
-                    .Select(e => $"{e.PropertyName}: {e.ErrorMessage}") // ✅ Include property names
-                    .ToList();
-            }
-            else
-            {
-                response.Errors.Add($"Error Message: {exception.Message}"); // ✅ Now works since `Errors` is initialized
-            }
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = statusCode;
 
-            return httpContext.Response.WriteAsync(JsonConvert.SerializeObject(response));
+            // ✅ Use JsonSerializer instead of WriteAsJsonAsync
+            await JsonSerializer.SerializeAsync(context.Response.Body, response, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            });
         }
-
-        private static int GetStatusCode(Exception exception) =>
-            exception switch
-            {
-                BadRequestException => StatusCodes.Status400BadRequest,
-                NotFoundException => StatusCodes.Status404NotFound, // ✅ Fixed NotFound to return 404
-                ValidationException => StatusCodes.Status422UnprocessableEntity,
-                _ => StatusCodes.Status500InternalServerError
-            };
     }
 }

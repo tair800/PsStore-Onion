@@ -11,15 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Presentation", "Presentatio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PsStore.Application", "Core\PsStore.Application\PsStore.Application.csproj", "{2181F411-D640-47E1-9A98-DD50F2A30382}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsStore.Domain", "Core\PsStore.Domain\PsStore.Domain.csproj", "{796C3F5E-6B56-47DA-A4E1-38429746D61A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PsStore.Domain", "Core\PsStore.Domain\PsStore.Domain.csproj", "{796C3F5E-6B56-47DA-A4E1-38429746D61A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsStore.Mapper", "Core\PsStore.Mapper\PsStore.Mapper.csproj", "{9496CD00-7F25-479F-B679-79A86C7D9FD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PsStore.Mapper", "Core\PsStore.Mapper\PsStore.Mapper.csproj", "{9496CD00-7F25-479F-B679-79A86C7D9FD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsStore.Infrastructure", "Infrastructure\PsStore.Infrastructure\PsStore.Infrastructure.csproj", "{0447E385-76BB-44CE-AB4C-95EB0158185D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PsStore.Infrastructure", "Infrastructure\PsStore.Infrastructure\PsStore.Infrastructure.csproj", "{0447E385-76BB-44CE-AB4C-95EB0158185D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsStore.Persistance", "Infrastructure\PsStore.Persistance\PsStore.Persistance.csproj", "{54E0447B-B0E4-4CE3-80CC-4314A57E0218}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PsStore.Persistance", "Infrastructure\PsStore.Persistance\PsStore.Persistance.csproj", "{54E0447B-B0E4-4CE3-80CC-4314A57E0218}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PsStore.Api", "Presentation\PsStore.Api\PsStore.Api.csproj", "{D93C3E6A-204D-4B67-B4D9-A4E1D084D768}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PsStore.Api", "Presentation\PsStore.Api\PsStore.Api.csproj", "{D93C3E6A-204D-4B67-B4D9-A4E1D084D768}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

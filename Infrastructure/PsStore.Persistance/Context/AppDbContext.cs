@@ -17,6 +17,8 @@ namespace PsStore.Persistance.Context
 
         public DbSet<Game> Games { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<ErrorLog> ErrorLogs { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
