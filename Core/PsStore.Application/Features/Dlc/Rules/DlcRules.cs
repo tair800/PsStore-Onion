@@ -19,7 +19,7 @@ namespace PsStore.Application.Features.Dlc.Rules
 
             if (!gameExists)
             {
-                throw new DlcNotFoundException(gameId);
+                throw new DlcNotFoundException();
             }
         }
 
@@ -41,5 +41,16 @@ namespace PsStore.Application.Features.Dlc.Rules
                 throw new ArgumentException("DLC price must be greater than zero.");
             }
         }
+
+        public async Task DlcMustExist(int dlcId)
+        {
+            bool exists = await _unitOfWork.GetReadRepository<Domain.Entities.Dlc>().AnyAsync(d => d.Id == dlcId);
+
+            if (!exists)
+            {
+                throw new DlcNotFoundException();
+            }
+        }
+
     }
 }
