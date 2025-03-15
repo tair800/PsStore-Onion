@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace PsStore.Application.Features.Game.Commands
+namespace PsStore.Application.Features.Game.Commands.CreateGame
 {
     public class CreateGameCommandRequest : IRequest<Unit>
     {
@@ -12,7 +12,7 @@ namespace PsStore.Application.Features.Game.Commands
         public int CategoryId { get; set; }
         public int PlatformId { get; set; }
 
-        public List<int> DlcIds { get; set; } = new();
+        public List<int>? DlcIds { get; set; } = new();
 
         //public List<int> RatingIds { get; set; } = new();
     }

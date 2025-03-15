@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PsStore.Application.Bases;
 using PsStore.Application.Behaviors;
 using PsStore.Application.Exceptions;
-using PsStore.Application.Features.Game.Commands;
+using PsStore.Application.Features.Game.Commands.CreateGame;
 using System.Reflection;
 
 namespace PsStore.Application

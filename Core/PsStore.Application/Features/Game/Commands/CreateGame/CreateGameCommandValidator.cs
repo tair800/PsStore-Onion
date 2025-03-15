@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace PsStore.Application.Features.Game.Commands
+namespace PsStore.Application.Features.Game.Commands.CreateGame
 {
     public class CreateGameCommandValidator : AbstractValidator<CreateGameCommandRequest>
     {

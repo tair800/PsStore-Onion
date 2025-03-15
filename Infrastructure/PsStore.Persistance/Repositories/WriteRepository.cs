@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PsStore.Application.Interfaces.Repositories;
 using PsStore.Domain.Common;
+using System.Linq.Expressions;
 
 namespace PsStore.Infrastructure.Repositories
 {
@@ -27,10 +28,26 @@ namespace PsStore.Infrastructure.Repositories
 
         public async Task<T> UpdateAsync(T entity)
         {
+            var dbEntry = dbContext.Entry(entity);
+
+            // Loop through properties and only mark modified ones
+            foreach (var property in dbEntry.Properties)
+            {
+                if (property.CurrentValue == null || property.CurrentValue.Equals(property.OriginalValue))
+                {
+                    property.IsModified = false; // Don't modify unchanged properties
+                }
+                else
+                {
+                    property.IsModified = true; // Mark only changed fields as modified
+                }
+            }
+
             entity.UpdatedDate = DateTime.UtcNow;
-            await Task.Run(() => Table.Update(entity));
+            await dbContext.SaveChangesAsync();
             return entity;
         }
+
 
         public async Task HardDeleteAsync(T entity)
         {
@@ -57,5 +74,17 @@ namespace PsStore.Infrastructure.Repositories
             Table.Update(entity);
             await dbContext.SaveChangesAsync();
         }
+
+        public void MarkAsModified<TProperty>(T entity, Expression<Func<T, TProperty>> propertyExpression)
+        {
+            dbContext.Entry(entity).Property(propertyExpression).IsModified = true;
+        }
+
+        public string GenerateSqlForUpdate(T entity)
+        {
+            var sql = dbContext.Entry(entity).DebugView.LongView;
+            return sql;
+        }
+
     }
 }

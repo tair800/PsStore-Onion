@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using PsStore.Application.Features.Game.Commands;
+using PsStore.Application.Features.Game.Commands.CreateGame;
 
 namespace PsStore.Api.Controllers
 {
@@ -21,6 +22,13 @@ namespace PsStore.Api.Controllers
             await mediator.Send(request);
 
             return Ok();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromForm] UpdateGameCommandRequest request)
+        {
+            await mediator.Send(request);
+            return Ok(new { message = "GAME updated successfully." });
         }
     }
 }

@@ -16,13 +16,15 @@ namespace PsStore.Application.Features.Category.Rules
 
         public async Task CategoryMustExist(int categoryId)
         {
-            var categoryExists = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
-                .AnyAsync(c => c.Id == categoryId);
+            bool exists = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
+                .AnyAsync(c => c.Id == categoryId && (!c.IsDeleted || c.IsDeleted == null)); // Ensure it's not deleted
 
-            if (!categoryExists)
+            if (!exists)
+            {
                 throw new CategoryNotFoundException(categoryId);
-
+            }
         }
+
 
 
         public async Task CategoryNameMustBeUnique(string categoryName)

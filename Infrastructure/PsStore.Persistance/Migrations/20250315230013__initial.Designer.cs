@@ -12,8 +12,8 @@ using PsStore.Persistance.Context;
 namespace PsStore.Persistance.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250314213620_AddRequestLoggingToErrorLogs")]
-    partial class AddRequestLoggingToErrorLogs
+    [Migration("20250315230013__initial")]
+    partial class _initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
