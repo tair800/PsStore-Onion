@@ -1,5 +1,9 @@
 ﻿using AutoMapper;
 using PsStore.Application.Features.Category.Commands.UpdateCategory;
+using PsStore.Application.Features.Category.Dtos;
+using PsStore.Application.Features.Category.Queries.GetAllCategories;
+using PsStore.Application.Features.Category.Queries.GetCategoriesWithGames;
+using PsStore.Application.Features.Category.Queries.GetCategoryById;
 using PsStore.Application.Features.Dlc.Commands;
 using PsStore.Application.Features.Dlc.Queries.GetAllDlc;
 using PsStore.Application.Features.Dlc.Queries.GetDlcById;
@@ -15,6 +19,10 @@ namespace PsStore.Mapper.AutoMapper.Profiles
             CreateMap<Dlc, GetDlcByIdQueryResponse>();
             CreateMap<UpdateDlcCommandRequest, Dlc>();
             CreateMap<UpdateCategoryCommandRequest, Category>();
+            CreateMap<Category, GetAllCategoriesQueryResponse>();
+            CreateMap<Category, GetCategoryByIdQueryResponse>();
+            CreateMap<Category, GetCategoriesWithGamesQueryResponse>();
+            CreateMap<Game, GameDto>();
 
         }
     }
