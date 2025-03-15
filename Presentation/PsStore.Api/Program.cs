@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using PsStore.Application;
 using PsStore.Application.Exceptions;
+using PsStore.Application.Features.Category.Rules;
 using PsStore.Application.Features.Dlc.Rules;
 using PsStore.Application.Features.Game.Rules;
 using PsStore.Application.Interfaces.Services;
@@ -61,6 +62,8 @@ builder.Services.AddScoped<GameRules>();
 builder.Services.AddScoped<DlcRules>();
 builder.Services.AddScoped<ErrorLoggingService>();
 builder.Services.AddScoped<IErrorLoggingService, ErrorLoggingService>();
+builder.Services.AddScoped<CategoryRules>();
+
 
 
 
