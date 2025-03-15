@@ -1,4 +1,5 @@
 ﻿using PsStore.Domain.Common;
+using System.Linq.Expressions;
 
 namespace PsStore.Application.Interfaces.Repositories
 {
@@ -11,6 +12,8 @@ namespace PsStore.Application.Interfaces.Repositories
         Task HardDeleteRangeAsync(IList<T> entity);
         Task SoftDeleteAsync(T entity);
         Task RestoreAsync(T entity);
+        void MarkAsModified<TProperty>(T entity, Expression<Func<T, TProperty>> propertyExpression);
+        string GenerateSqlForUpdate(T entity);
 
     }
 }

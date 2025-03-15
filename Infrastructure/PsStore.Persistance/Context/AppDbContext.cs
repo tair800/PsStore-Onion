@@ -28,10 +28,12 @@ namespace PsStore.Persistance.Context
 
             modelBuilder.Entity<Category>()
                 .Property(c => c.Id)
-                .ValueGeneratedOnAdd(); // ✅ Ensures auto-increment
+                .ValueGeneratedOnAdd();
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
+
+
 
     }
 }

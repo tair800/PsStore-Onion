@@ -1,8 +1,8 @@
 ﻿namespace PsStore.Application.Features.Game.Exceptions
 {
-    public class GameTitleAlreadyExistsException : Exception
+    public class GameTitleMustBeUniqueException : Exception
     {
-        public GameTitleAlreadyExistsException(string title)
+        public GameTitleMustBeUniqueException(string title)
             : base($"A game with the title '{title}' already exists.") { }
     }
 }

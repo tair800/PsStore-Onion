@@ -26,10 +26,10 @@ namespace PsStore.Domain.Entities
         public int CategoryId { get; set; }
         public Category Category { get; set; }
         public Platform Platform { get; set; }
-        public ICollection<Dlc> Dlcs { get; set; }
+        public ICollection<Dlc>? Dlcs { get; set; } = new List<Dlc>();
         //public ICollection<WishlistGame> WishlistGames { get; set; } = new List<WishlistGame>();
         //public ICollection<BasketGame> BasketGames { get; set; }
         //public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-        public ICollection<Rating> Ratings { get; set; }
+        public ICollection<Rating>? Ratings { get; set; }
     }
 }

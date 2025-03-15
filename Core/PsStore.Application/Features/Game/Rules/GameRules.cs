@@ -1,4 +1,5 @@
-﻿using PsStore.Application.Features.Game.Exceptions;
+﻿using PsStore.Application.Features.Category.Exceptions;
+using PsStore.Application.Features.Game.Exceptions;
 using PsStore.Application.Interfaces.UnitOfWorks;
 using PsStore.Domain.Entities;
 
@@ -19,7 +20,7 @@ namespace PsStore.Application.Features.Game.Rules
                 .AnyAsync(g => g.Title == title);
 
             if (exists)
-                throw new GameTitleAlreadyExistsException(title);
+                throw new GameTitleMustBeUniqueException(title);
         }
 
         public async Task PlatformMustExist(int platformId)

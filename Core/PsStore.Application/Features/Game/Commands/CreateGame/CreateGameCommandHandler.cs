@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using PsStore.Application.Bases;
-using PsStore.Application.Features.Game.Commands;
+using PsStore.Application.Features.Game.Commands.CreateGame;
 using PsStore.Application.Features.Game.Rules;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
@@ -33,7 +33,6 @@ public class CreateGameCommandHandler : BaseHandler, IRequestHandler<CreateGameC
         await _gameRules.PlatformMustExist(request.PlatformId);
         await _gameRules.CategoryMustExist(request.CategoryId);
 
-        // Retrieve associated DLCs if provided
         List<Dlc> dlcs = new();
         if (request.DlcIds?.Any() == true)
         {
@@ -41,13 +40,13 @@ public class CreateGameCommandHandler : BaseHandler, IRequestHandler<CreateGameC
                 .GetAllAsync(d => request.DlcIds.Contains(d.Id)))
                 .ToList();
 
-            if (dlcs.Count != request.DlcIds.Count)
-            {
-                _logger.LogWarning("Some DLCs were not found. Requested: {RequestedDlcIds}, Found: {FoundDlcIds}",
-                    string.Join(",", request.DlcIds), string.Join(",", dlcs.Select(d => d.Id)));
+            //if (dlcs.Count != request.DlcIds.Count)
+            //{
+            //    _logger.LogWarning("Some DLCs were not found. Requested: {RequestedDlcIds}, Found: {FoundDlcIds}",
+            //        string.Join(",", request.DlcIds), string.Join(",", dlcs.Select(d => d.Id)));
 
-                throw new DlcNotFoundException();
-            }
+            //    throw new DlcNotFoundException();
+            //}
         }
 
         _logger.LogInformation("Creating new game: Title={Title}, CategoryId={CategoryId}, Price={Price}, Platform={Platform}",
@@ -55,7 +54,10 @@ public class CreateGameCommandHandler : BaseHandler, IRequestHandler<CreateGameC
 
         Game game = _mapper.Map<Game>(request);
         game.Platform = (Platform)request.PlatformId;
-        game.Dlcs = dlcs;
+        if (dlcs.Any())
+        {
+            game.Dlcs = dlcs;
+        }
 
         await _unitOfWork.GetWriteRepository<Game>().AddAsync(game);
 
