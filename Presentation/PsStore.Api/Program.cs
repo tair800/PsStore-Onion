@@ -70,7 +70,7 @@ builder.Services.AddScoped<CategoryRules>();
 //  Configure Swagger with Authentication
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Youtube API", Version = "v1", Description = "Youtube API Swagger client" });
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "PS API", Version = "v1", Description = "PS API Swagger client" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
