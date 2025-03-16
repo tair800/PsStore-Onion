@@ -13,6 +13,9 @@ using PsStore.Application.Features.Dlc.Queries.GetAllDlc;
 using PsStore.Application.Features.Dlc.Queries.GetDlcById;
 using PsStore.Application.Features.Game.Commands;
 using PsStore.Application.Features.Game.Commands.CreateGame;
+using PsStore.Application.Features.Game.Dtos;
+using PsStore.Application.Features.Game.Queries.GetAllGame;
+using PsStore.Application.Features.Game.Queries.GetGameById;
 using PsStore.Domain.Entities;
 
 namespace PsStore.Mapper.AutoMapper.Profiles
@@ -21,7 +24,7 @@ namespace PsStore.Mapper.AutoMapper.Profiles
     {
         public MappingProfile()
         {
-            //  Category Mappings
+            //Category Mappings
             CreateMap<CreateCategoryCommandRequest, Category>();
             CreateMap<UpdateCategoryCommandRequest, Category>();
             CreateMap<DeleteCategoryCommandRequest, Category>();
@@ -30,7 +33,7 @@ namespace PsStore.Mapper.AutoMapper.Profiles
             CreateMap<Category, GetCategoryByIdQueryResponse>();
             CreateMap<Category, GetCategoriesWithGamesQueryResponse>();
 
-            //  DLC Mappings
+            // DLC Mappings
             CreateMap<CreateDlcCommandRequest, Dlc>();
             CreateMap<UpdateDlcCommandRequest, Dlc>();
             CreateMap<DeleteDlcCommandRequest, Dlc>();
@@ -38,13 +41,30 @@ namespace PsStore.Mapper.AutoMapper.Profiles
             CreateMap<Dlc, GetAllDlcQueryResponse>();
             CreateMap<Dlc, GetDlcByIdQueryResponse>();
 
-            // Game Mappings
+            //   Game Mappings
             CreateMap<Game, GameDto>();
 
-            // Map CreateGameCommandRequest to Game
+            //  Map CreateGameCommandRequest to Game
             CreateMap<CreateGameCommandRequest, Game>();
 
-            //  Map UpdateGameCommandRequest to Game
+            //  GetAllGameQueryResponse Mapping
+            CreateMap<Game, GetAllGameQueryResponse>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.PlatformName, opt => opt.MapFrom(src => src.Platform.ToString()))
+                .ForMember(dest => dest.Dlcs, opt => opt.MapFrom(src => src.Dlcs));
+
+            CreateMap<Dlc, DlcDto>();
+
+            //  GetGameByIdQueryResponse Mapping
+            CreateMap<Game, GetGameByIdQueryResponse>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
+                .ForMember(dest => dest.PlatformName, opt => opt.MapFrom(src => src.Platform.ToString()))
+                .ForMember(dest => dest.Dlcs, opt => opt.MapFrom(src => src.Dlcs));
+            //    .ForMember(dest => dest.Ratings, opt => opt.MapFrom(src => src.Ratings);
+
+            //CreateMap<Rating, RatingResponse>(); // ✅ Map Rating Entity to DTO
+
+            //  UpdateGameCommandRequest to Game
             CreateMap<UpdateGameCommandRequest, Game>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }

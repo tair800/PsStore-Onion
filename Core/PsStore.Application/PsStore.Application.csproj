@@ -21,9 +21,4 @@
 		<ProjectReference Include="..\PsStore.Domain\PsStore.Domain.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Features\Game\Commands\DeleteGame\" />
-	  <Folder Include="Features\Game\Commands\RestoreGame\" />
-	</ItemGroup>
-
 </Project>

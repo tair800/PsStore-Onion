@@ -46,7 +46,7 @@ namespace PsStore.Application.Exceptions
 
             switch (exception)
             {
-                //  Category Exceptions
+                // Category Exceptions
                 case CategoryNotFoundException:
                     statusCode = StatusCodes.Status404NotFound;
                     errorCode = "CATEGORY_NOT_FOUND";
@@ -80,7 +80,7 @@ namespace PsStore.Application.Exceptions
                     errorCode = "CATEGORY_MUST_HAVE_GAMES";
                     break;
 
-                //  Game Exceptions
+                // Game Exceptions
                 case GameNotFoundException:
                     statusCode = StatusCodes.Status404NotFound;
                     errorCode = "GAME_NOT_FOUND";
@@ -97,12 +97,26 @@ namespace PsStore.Application.Exceptions
                     statusCode = StatusCodes.Status500InternalServerError;
                     errorCode = "GAME_UPDATE_FAILED";
                     break;
+                case GameAlreadyActiveException:
+                    statusCode = StatusCodes.Status409Conflict;
+                    errorCode = "GAME_ALREADY_ACTIVE";
+                    break;
+                case GameAlreadyDeletedException:
+                    statusCode = StatusCodes.Status409Conflict;
+                    errorCode = "GAME_ALREADY_DELETED";
+                    break;
+                case GameNotDeletedException:
+                    statusCode = StatusCodes.Status400BadRequest;
+                    errorCode = "GAME_NOT_DELETED";
+                    break;
+
+                // Platform Exceptions
                 case PlatformNotFoundException:
                     statusCode = StatusCodes.Status404NotFound;
                     errorCode = "PLATFORM_NOT_FOUND";
                     break;
 
-                //  DLC Exceptions
+                // DLC Exceptions
                 case DlcNotFoundException:
                     statusCode = StatusCodes.Status404NotFound;
                     errorCode = "DLC_NOT_FOUND";

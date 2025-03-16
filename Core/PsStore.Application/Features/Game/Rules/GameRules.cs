@@ -39,5 +39,14 @@ namespace PsStore.Application.Features.Game.Rules
             if (!exists)
                 throw new CategoryNotFoundException(categoryId);
         }
+
+        public async Task GameMustExist(int gameId)
+        {
+            var gameExists = await _unitOfWork.GetReadRepository<Domain.Entities.Game>().AnyAsync(g => g.Id == gameId);
+            if (!gameExists)
+                throw new GameNotFoundException(gameId);
+        }
+
+
     }
 }
