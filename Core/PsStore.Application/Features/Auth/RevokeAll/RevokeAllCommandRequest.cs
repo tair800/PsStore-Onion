@@ -2,7 +2,7 @@
 
 namespace PsStore.Application.Features.Auth.RevokeAll
 {
-    public class RevokeAllCommandRequest : IRequest<Unit>
+    public class RevokeAllCommandRequest : IRequest<Result<Unit>>
     {
     }
 }

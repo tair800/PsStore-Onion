@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using PsStore.Application.Bases;
-using PsStore.Application.Exceptions; // Importing the custom exceptions
 using PsStore.Application.Features.Auth.Rules;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.Token;
@@ -14,7 +13,7 @@ using System.Security.Claims;
 
 namespace PsStore.Application.Features.Auth.Commands.RefreshToken
 {
-    public class RefresTokenCommandHandler : BaseHandler, IRequestHandler<RefresTokenCommandRequest, RefresTokenCommandResponse>
+    public class RefresTokenCommandHandler : BaseHandler, IRequestHandler<RefresTokenCommandRequest, Result<RefresTokenCommandResponse>>
     {
         private readonly UserManager<User> userManager;
         private readonly AuthRules authRules;
@@ -37,7 +36,7 @@ namespace PsStore.Application.Features.Auth.Commands.RefreshToken
             this.logger = logger;
         }
 
-        public async Task<RefresTokenCommandResponse> Handle(RefresTokenCommandRequest request, CancellationToken cancellationToken)
+        public async Task<Result<RefresTokenCommandResponse>> Handle(RefresTokenCommandRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -49,14 +48,14 @@ namespace PsStore.Application.Features.Auth.Commands.RefreshToken
                 if (email == null)
                 {
                     logger.LogWarning("Refresh token request failed: Email claim not found in expired token.");
-                    throw new RefreshTokenExpiredException("Invalid token: Email claim missing.");
+                    return Result<RefresTokenCommandResponse>.Failure("Invalid token: Email claim missing.", StatusCodes.Status400BadRequest, "INVALID_TOKEN");
                 }
 
                 User? user = await userManager.FindByEmailAsync(email);
                 if (user == null)
                 {
                     logger.LogWarning("Refresh token request failed: User not found for email: {Email}", email);
-                    throw new UserNotFoundException(email);
+                    return Result<RefresTokenCommandResponse>.Failure($"User not found for email: {email}.", StatusCodes.Status404NotFound, "USER_NOT_FOUND");
                 }
 
                 logger.LogInformation("User {UserId} found. Validating refresh token expiration.", user.Id);
@@ -70,26 +69,16 @@ namespace PsStore.Application.Features.Auth.Commands.RefreshToken
 
                 logger.LogInformation("Successfully refreshed tokens for user {UserId}", user.Id);
 
-                return new RefresTokenCommandResponse
+                return Result<RefresTokenCommandResponse>.Success(new RefresTokenCommandResponse
                 {
                     AccessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
                     RefreshToken = newRefreshToken
-                };
-            }
-            catch (RefreshTokenExpiredException ex)
-            {
-                logger.LogWarning(ex, "Refresh token expired or invalid.");
-                throw;
-            }
-            catch (UserNotFoundException ex)
-            {
-                logger.LogWarning(ex, "User not found for refresh token request.");
-                throw;
+                });
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An error occurred while processing the refresh token request.");
-                throw new Exception("An unexpected error occurred while processing your request.");
+                return Result<RefresTokenCommandResponse>.Failure("An unexpected error occurred while processing the request.", StatusCodes.Status500InternalServerError, "INTERNAL_ERROR");
             }
         }
     }
