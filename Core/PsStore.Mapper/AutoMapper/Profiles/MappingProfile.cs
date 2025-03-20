@@ -1,4 +1,7 @@
 ﻿using AutoMapper;
+using PsStore.Application.Features.Auth.Commands.Login;
+using PsStore.Application.Features.Auth.Commands.RefreshToken;
+using PsStore.Application.Features.Auth.Commands.Register;
 using PsStore.Application.Features.Category.Commands;
 using PsStore.Application.Features.Category.Commands.DeleteCategory;
 using PsStore.Application.Features.Category.Commands.RestoreCategory;
@@ -48,25 +51,32 @@ namespace PsStore.Mapper.AutoMapper.Profiles
             CreateMap<CreateGameCommandRequest, Game>();
 
             //  GetAllGameQueryResponse Mapping
-            CreateMap<Game, GetAllGameQueryResponse>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.PlatformName, opt => opt.MapFrom(src => src.Platform.ToString()))
-                .ForMember(dest => dest.Dlcs, opt => opt.MapFrom(src => src.Dlcs));
+            CreateMap<Game, GetAllGameQueryResponse>();
 
             CreateMap<Dlc, DlcDto>();
 
             //  GetGameByIdQueryResponse Mapping
-            CreateMap<Game, GetGameByIdQueryResponse>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ForMember(dest => dest.PlatformName, opt => opt.MapFrom(src => src.Platform.ToString()))
-                .ForMember(dest => dest.Dlcs, opt => opt.MapFrom(src => src.Dlcs));
-            //    .ForMember(dest => dest.Ratings, opt => opt.MapFrom(src => src.Ratings);
+            CreateMap<Game, GetGameByIdQueryResponse>();
 
-            //CreateMap<Rating, RatingResponse>(); // ✅ Map Rating Entity to DTO
+
 
             //  UpdateGameCommandRequest to Game
             CreateMap<UpdateGameCommandRequest, Game>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            // Auth Mappings
+            // Login
+            CreateMap<LoginCommandRequest, User>();
+            CreateMap<User, LoginCommandResponse>();
+
+            // Register
+            CreateMap<RegisterCommandRequest, User>();
+
+            // RefreshToken
+            CreateMap<RefresTokenCommandRequest, User>();
+            CreateMap<User, RefresTokenCommandResponse>();
+
+
         }
     }
 }
