@@ -4,14 +4,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PsStore.Application.Bases;
-using PsStore.Application.Exceptions;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
 using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.RevokeAll
 {
-    public class RevokeAllCommandHandler : BaseHandler, IRequestHandler<RevokeAllCommandRequest, Unit>
+    public class RevokeAllCommandHandler : BaseHandler, IRequestHandler<RevokeAllCommandRequest, Result<Unit>>
     {
         private readonly UserManager<User> userManager;
         private readonly ILogger<RevokeAllCommandHandler> logger;
@@ -27,7 +26,7 @@ namespace PsStore.Application.Features.Auth.RevokeAll
             this.logger = logger;
         }
 
-        public async Task<Unit> Handle(RevokeAllCommandRequest request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(RevokeAllCommandRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -42,22 +41,17 @@ namespace PsStore.Application.Features.Auth.RevokeAll
                     if (!result.Succeeded)
                     {
                         logger.LogWarning("Failed to update refresh token for user {UserId}.", user.Id);
-                        throw new UserUpdateFailedException(user.Id.ToString()); // Custom exception for user update failure
+                        return Result<Unit>.Failure("Failed to revoke refresh token for some users.", StatusCodes.Status500InternalServerError, "USER_UPDATE_FAILED");
                     }
                 }
 
                 logger.LogInformation("Successfully revoked refresh tokens for all users.");
-                return Unit.Value;
-            }
-            catch (UserUpdateFailedException ex)
-            {
-                logger.LogError(ex, "Revocation failed for user update.");
-                throw;
+                return Result<Unit>.Success(Unit.Value);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An unexpected error occurred while revoking refresh tokens for all users.");
-                throw new Exception("An unexpected error occurred while processing the revoke all request.");
+                return Result<Unit>.Failure("An unexpected error occurred while processing the revoke all request.", StatusCodes.Status500InternalServerError, "INTERNAL_ERROR");
             }
         }
     }

@@ -1,27 +1,37 @@
-﻿using PsStore.Application.Bases;
-using PsStore.Application.Features.Auth.Exceptions;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using PsStore.Application.Bases;
 using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.Rules
 {
     public class AuthRules : BaseRules
     {
-        public Task UserShouldNotBeExist(User? user)
+        public Task<Result<Unit>> UserShouldNotBeExist(User? user)
         {
-            if (user is not null) throw new UserAlreadyExistException();
-            return Task.CompletedTask;
+            if (user is not null)
+            {
+                return Task.FromResult(Result<Unit>.Failure("User already exists.", StatusCodes.Status400BadRequest, "USER_ALREADY_EXISTS"));
+            }
+            return Task.FromResult(Result<Unit>.Success(Unit.Value));
         }
 
-        public Task EmailOrPasswordShouldntBeInvalidException(User user, bool checkPassword)
+        public Task<Result<Unit>> EmailOrPasswordShouldntBeInvalidException(User user, bool checkPassword)
         {
-            if (user is null || !checkPassword) throw new EmailOrPasswordShouldntBeInvalidException();
-            return Task.CompletedTask;
+            if (user is null || !checkPassword)
+            {
+                return Task.FromResult(Result<Unit>.Failure("Invalid email or password.", StatusCodes.Status400BadRequest, "INVALID_CREDENTIALS"));
+            }
+            return Task.FromResult(Result<Unit>.Success(Unit.Value));
         }
 
-        public Task RefreshTokenShouldNotBeExpired(DateTime? expiryDate)
+        public Task<Result<Unit>> RefreshTokenShouldNotBeExpired(DateTime? expiryDate)
         {
-            if (expiryDate <= DateTime.Now) throw new RefreshTokenShouldNotBeExpiredException();
-            return Task.CompletedTask;
+            if (expiryDate <= DateTime.Now)
+            {
+                return Task.FromResult(Result<Unit>.Failure("Refresh token expired.", StatusCodes.Status400BadRequest, "REFRESH_TOKEN_EXPIRED"));
+            }
+            return Task.FromResult(Result<Unit>.Success(Unit.Value));
         }
     }
 }

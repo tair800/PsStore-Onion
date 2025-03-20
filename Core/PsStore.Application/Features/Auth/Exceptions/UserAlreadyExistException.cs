@@ -1,9 +1,9 @@
-﻿using PsStore.Application.Bases;
+﻿//using PsStore.Application.Bases;
 
-namespace PsStore.Application.Features.Auth.Exceptions
-{
-    public class UserAlreadyExistException : BaseException
-    {
-        public UserAlreadyExistException() : base("User already exist") { }
-    }
-}
+//namespace PsStore.Application.Features.Auth.Exceptions
+//{
+//    public class UserAlreadyExistException : BaseException
+//    {
+//        public UserAlreadyExistException() : base("User already exist") { }
+//    }
+//}

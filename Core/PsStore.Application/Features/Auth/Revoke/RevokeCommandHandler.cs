@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using PsStore.Application.Bases;
-using PsStore.Application.Exceptions;
 using PsStore.Application.Features.Auth.Rules;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
@@ -11,7 +10,7 @@ using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.Revoke
 {
-    public class RevokeCommandHandler : BaseHandler, IRequestHandler<RevokeCommandRequest, Unit>
+    public class RevokeCommandHandler : BaseHandler, IRequestHandler<RevokeCommandRequest, Result<Unit>>
     {
         private readonly UserManager<User> userManager;
         private readonly AuthRules authRules;
@@ -30,7 +29,7 @@ namespace PsStore.Application.Features.Auth.Revoke
             this.logger = logger;
         }
 
-        public async Task<Unit> Handle(RevokeCommandRequest request, CancellationToken cancellationToken)
+        public async Task<Result<Unit>> Handle(RevokeCommandRequest request, CancellationToken cancellationToken)
         {
             try
             {
@@ -41,7 +40,7 @@ namespace PsStore.Application.Features.Auth.Revoke
                 if (user == null)
                 {
                     logger.LogWarning("User not found for email: {Email}", request.Email);
-                    throw new UserNotFoundException(request.Email);
+                    return Result<Unit>.Failure("User not found.", StatusCodes.Status404NotFound, "USER_NOT_FOUND");
                 }
 
                 await authRules.UserShouldNotBeExist(user);
@@ -52,27 +51,17 @@ namespace PsStore.Application.Features.Auth.Revoke
                 if (!result.Succeeded)
                 {
                     logger.LogError("Failed to update user {UserId} during revoke operation.", user.Id);
-                    throw new UserUpdateFailedException(user.Id.ToString());
+                    return Result<Unit>.Failure("Failed to revoke refresh token.", StatusCodes.Status500InternalServerError, "USER_UPDATE_FAILED");
                 }
 
                 logger.LogInformation("Successfully revoked refresh token for user {UserId}.", user.Id);
 
-                return Unit.Value;
-            }
-            catch (UserNotFoundException ex)
-            {
-                logger.LogWarning(ex, "Revocation failed due to user not found.");
-                throw;
-            }
-            catch (UserUpdateFailedException ex)
-            {
-                logger.LogError(ex, "Revocation failed during user update.");
-                throw;
+                return Result<Unit>.Success(Unit.Value);
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "An unexpected error occurred while processing the revoke request.");
-                throw new Exception("An unexpected error occurred while processing your request.");
+                return Result<Unit>.Failure("An unexpected error occurred while processing the request.", StatusCodes.Status500InternalServerError, "INTERNAL_ERROR");
             }
         }
     }

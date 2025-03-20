@@ -22,36 +22,61 @@ namespace PsStore.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterCommandRequest request)
         {
-            await mediator.Send(request);
-            return StatusCode(StatusCodes.Status201Created);
+            var result = await mediator.Send(request);
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return StatusCode(StatusCodes.Status201Created, new { message = "User registered successfully." });
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginCommandRequest request)
         {
-            var response = await mediator.Send(request);
-            return StatusCode(StatusCodes.Status200OK, response);
+            var result = await mediator.Send(request);
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(result.Data);
         }
 
         [HttpPost]
         public async Task<IActionResult> RefreshToken(RefresTokenCommandRequest request)
         {
-            var response = await mediator.Send(request);
-            return StatusCode(StatusCodes.Status200OK, response);
+            var result = await mediator.Send(request);
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(result.Data);
         }
 
         [HttpPost]
         public async Task<IActionResult> Revoke(RevokeCommandRequest request)
         {
-            await mediator.Send(request);
-            return StatusCode(StatusCodes.Status200OK);
+            var result = await mediator.Send(request);
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(new { message = "Refresh token successfully revoked." });
         }
 
         [HttpPost]
         public async Task<IActionResult> RevokeAll()
         {
-            await mediator.Send(new RevokeAllCommandRequest());
-            return StatusCode(StatusCodes.Status200OK);
+            var result = await mediator.Send(new RevokeAllCommandRequest());
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(new { message = "Successfully revoked refresh tokens for all users." });
         }
     }
 }
