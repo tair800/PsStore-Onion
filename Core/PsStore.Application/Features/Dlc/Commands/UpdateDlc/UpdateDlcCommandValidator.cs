@@ -19,15 +19,11 @@ namespace PsStore.Application.Features.Dlc.Commands
             RuleFor(d => d.Price)
                 .GreaterThan(0).WithMessage("Price must be greater than 0.");
 
-            //RuleFor(d => d.SalePrice)
-            //    .GreaterThanOrEqualTo(0).WithMessage("Sale Price must be non-negative.");
+            // Rule for GameId: Only enforce if it is provided.
+            //RuleFor(d => d.GameId)
+            //    .GreaterThan(0).WithMessage("Game ID must be greater than 0.")
+            //    .When(d => d.GameId.HasValue);  // Only apply this rule if GameId is provided (not null).
 
-            //RuleFor(d => d.ImgUrl)
-            //    .NotEmpty().WithMessage("Image URL is required.")
-            //    .Matches(@"^(http|https)://").WithMessage("Image URL must be a valid URL.");
-
-            RuleFor(d => d.GameId)
-                .GreaterThan(0).WithMessage("Game ID must be greater than 0.");
         }
     }
 }

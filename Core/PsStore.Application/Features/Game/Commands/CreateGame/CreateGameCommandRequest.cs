@@ -2,7 +2,7 @@
 
 namespace PsStore.Application.Features.Game.Commands.CreateGame
 {
-    public class CreateGameCommandRequest : IRequest<Unit>
+    public class CreateGameCommandRequest : IRequest<Result<Unit>>
     {
         public string Title { get; set; }
         public string Description { get; set; }

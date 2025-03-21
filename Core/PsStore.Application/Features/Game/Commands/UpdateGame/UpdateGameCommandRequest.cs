@@ -2,7 +2,7 @@
 
 namespace PsStore.Application.Features.Game.Commands
 {
-    public class UpdateGameCommandRequest : IRequest<Unit>
+    public class UpdateGameCommandRequest : IRequest<Result<Unit>>
     {
         public int Id { get; set; }
 

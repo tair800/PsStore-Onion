@@ -1,56 +1,59 @@
-﻿using PsStore.Application.Features.Dlc.Exceptions;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using PsStore.Application.Interfaces.UnitOfWorks;
+using PsStore.Domain.Entities;
 
-namespace PsStore.Application.Features.Dlc.Rules
+public class DlcRules
 {
-    public class DlcRules
+    private readonly IUnitOfWork _unitOfWork;
+
+    public DlcRules(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
-
-        public DlcRules(IUnitOfWork unitOfWork)
-        {
-            _unitOfWork = unitOfWork;
-        }
-
-        public async Task GameMustExist(int gameId)
-        {
-            var gameExists = await _unitOfWork.GetReadRepository<Domain.Entities.Game>()
-                .AnyAsync(g => g.Id == gameId);
-
-            if (!gameExists)
-            {
-                throw new DlcNotFoundException();
-            }
-        }
-
-        public async Task DlcNameMustBeUnique(int gameId, string dlcName)
-        {
-            var existingDlc = await _unitOfWork.GetReadRepository<Domain.Entities.Dlc>()
-                .AnyAsync(d => d.Name == dlcName && d.GameId == gameId);
-
-            if (existingDlc)
-            {
-                throw new DlcAlreadyExistsException(dlcName, gameId);
-            }
-        }
-
-        public void PriceMustBeValid(double price)
-        {
-            if (price <= 0)
-            {
-                throw new ArgumentException("DLC price must be greater than zero.");
-            }
-        }
-
-        public async Task DlcMustExist(int dlcId)
-        {
-            bool exists = await _unitOfWork.GetReadRepository<Domain.Entities.Dlc>().AnyAsync(d => d.Id == dlcId);
-
-            if (!exists)
-            {
-                throw new DlcNotFoundException();
-            }
-        }
-
+        _unitOfWork = unitOfWork;
     }
+
+    public Result<Unit> PriceMustBeValid(decimal price)
+    {
+        if (price <= 0)
+        {
+            return Result<Unit>.Failure("Price must be greater than zero.", StatusCodes.Status400BadRequest, "INVALID_PRICE");
+        }
+
+        return Result<Unit>.Success(Unit.Value);
+    }
+
+    public async Task<Result<Unit>> GameMustExist(int gameId)
+    {
+        var game = await _unitOfWork.GetReadRepository<Game>().GetAsync(g => g.Id == gameId);
+        if (game == null)
+        {
+            return Result<Unit>.Failure("Game not found.", StatusCodes.Status404NotFound, "GAME_NOT_FOUND");
+        }
+
+        return Result<Unit>.Success(Unit.Value);
+    }
+
+    public async Task<Result<Unit>> DlcNameMustBeUnique(int gameId, string name)
+    {
+        var dlc = await _unitOfWork.GetReadRepository<Dlc>().Find(d => d.GameId == gameId && d.Name == name).FirstOrDefaultAsync();
+        if (dlc != null)
+        {
+            return Result<Unit>.Failure("DLC name must be unique.", StatusCodes.Status409Conflict, "DLC_NAME_ALREADY_EXISTS");
+        }
+
+        return Result<Unit>.Success(Unit.Value);
+    }
+
+    public async Task<Result<Unit>> DlcMustExist(int dlcId)
+    {
+        var dlc = await _unitOfWork.GetReadRepository<Dlc>().GetAsync(d => d.Id == dlcId);
+        if (dlc == null)
+        {
+            return Result<Unit>.Failure("DLC not found.", StatusCodes.Status404NotFound, "DLC_NOT_FOUND");
+        }
+
+        return Result<Unit>.Success(Unit.Value);
+    }
+
 }

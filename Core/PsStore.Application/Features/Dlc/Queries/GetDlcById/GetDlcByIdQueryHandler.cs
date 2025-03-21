@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
 
 namespace PsStore.Application.Features.Dlc.Queries.GetDlcById
 {
-    public class GetDlcByIdQueryHandler : IRequestHandler<GetDlcByIdQueryRequest, GetDlcByIdQueryResponse>
+    public class GetDlcByIdQueryHandler : IRequestHandler<GetDlcByIdQueryRequest, Result<GetDlcByIdQueryResponse>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -16,7 +17,7 @@ namespace PsStore.Application.Features.Dlc.Queries.GetDlcById
             _mapper = mapper;
         }
 
-        public async Task<GetDlcByIdQueryResponse> Handle(GetDlcByIdQueryRequest request, CancellationToken cancellationToken)
+        public async Task<Result<GetDlcByIdQueryResponse>> Handle(GetDlcByIdQueryRequest request, CancellationToken cancellationToken)
         {
             var dlc = await _unitOfWork.GetReadRepository<Domain.Entities.Dlc>().GetAsync(
                 predicate: d => d.Id == request.Id,
@@ -26,9 +27,13 @@ namespace PsStore.Application.Features.Dlc.Queries.GetDlcById
             );
 
             if (dlc is null)
-                throw new KeyNotFoundException($"DLC with ID '{request.Id}' not found.");
+            {
+                return Result<GetDlcByIdQueryResponse>.Failure("DLC not found.", StatusCodes.Status404NotFound, "DLC_NOT_FOUND");
+            }
 
-            return _mapper.Map<GetDlcByIdQueryResponse>(dlc);
+            var response = _mapper.Map<GetDlcByIdQueryResponse>(dlc);
+
+            return Result<GetDlcByIdQueryResponse>.Success(response);
         }
     }
 }
