@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
 
 namespace PsStore.Application.Features.Game.Queries.GetAllGame
 {
-    public class GetAllGameQueryHandler : IRequestHandler<GetAllGameQueryRequest, List<GetAllGameQueryResponse>>
+    public class GetAllGameQueryHandler : IRequestHandler<GetAllGameQueryRequest, Result<List<GetAllGameQueryResponse>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -16,8 +17,9 @@ namespace PsStore.Application.Features.Game.Queries.GetAllGame
             _mapper = mapper;
         }
 
-        public async Task<List<GetAllGameQueryResponse>> Handle(GetAllGameQueryRequest request, CancellationToken cancellationToken)
+        public async Task<Result<List<GetAllGameQueryResponse>>> Handle(GetAllGameQueryRequest request, CancellationToken cancellationToken)
         {
+            // Retrieve the games with their related data (Category, DLCs)
             var games = await _unitOfWork.GetReadRepository<Domain.Entities.Game>().GetAllAsync(
                 include: query => query
                     .Include(g => g.Category)
@@ -26,14 +28,26 @@ namespace PsStore.Application.Features.Game.Queries.GetAllGame
                 includeDeleted: request.IncludeDeleted
             );
 
-            var response = _mapper.Map<List<GetAllGameQueryResponse>>(games);
-
-            foreach (var game in response)
+            if (!games.Any())
             {
-                game.PlatformName = games.FirstOrDefault(g => g.Id == game.Id)?.Platform.ToString();
+                return Result<List<GetAllGameQueryResponse>>.Failure("No games found.", StatusCodes.Status404NotFound, "GAMES_NOT_FOUND");
             }
 
-            return response;
+            // Map the game entities to response DTOs
+            var response = _mapper.Map<List<GetAllGameQueryResponse>>(games);
+
+            // Set PlatformName in the response
+            foreach (var game in response)
+            {
+                var platform = games.FirstOrDefault(g => g.Id == game.Id)?.Platform.ToString();
+                if (platform != null)
+                {
+                    game.PlatformName = platform;
+                }
+            }
+
+            // Return the successful result
+            return Result<List<GetAllGameQueryResponse>>.Success(response);
         }
     }
 }

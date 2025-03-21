@@ -3,8 +3,6 @@ using Microsoft.OpenApi.Models;
 using PsStore.Application;
 using PsStore.Application.Exceptions;
 using PsStore.Application.Features.Category.Rules;
-using PsStore.Application.Features.Dlc.Rules;
-using PsStore.Application.Features.Game.Rules;
 using PsStore.Application.Interfaces.Services;
 using PsStore.Infrastructure;
 using PsStore.Infrastructure.Services;

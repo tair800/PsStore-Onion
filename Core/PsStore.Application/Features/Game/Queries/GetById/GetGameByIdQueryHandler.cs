@@ -1,12 +1,12 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using PsStore.Application.Features.Game.Exceptions;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
 
 namespace PsStore.Application.Features.Game.Queries.GetGameById
 {
-    public class GetGameByIdQueryHandler : IRequestHandler<GetGameByIdQueryRequest, GetGameByIdQueryResponse>
+    public class GetGameByIdQueryHandler : IRequestHandler<GetGameByIdQueryRequest, Result<GetGameByIdQueryResponse>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -17,7 +17,7 @@ namespace PsStore.Application.Features.Game.Queries.GetGameById
             _mapper = mapper;
         }
 
-        public async Task<GetGameByIdQueryResponse> Handle(GetGameByIdQueryRequest request, CancellationToken cancellationToken)
+        public async Task<Result<GetGameByIdQueryResponse>> Handle(GetGameByIdQueryRequest request, CancellationToken cancellationToken)
         {
             var game = await _unitOfWork.GetReadRepository<Domain.Entities.Game>().GetAsync(
                 g => g.Id == request.Id,
@@ -30,13 +30,15 @@ namespace PsStore.Application.Features.Game.Queries.GetGameById
             );
 
             if (game == null)
-                throw new GameNotFoundException(request.Id);
+            {
+                return Result<GetGameByIdQueryResponse>.Failure("Game not found.", StatusCodes.Status404NotFound, "GAME_NOT_FOUND");
+            }
 
             var response = _mapper.Map<GetGameByIdQueryResponse>(game);
 
             response.PlatformName = game.Platform.ToString();
 
-            return response;
+            return Result<GetGameByIdQueryResponse>.Success(response);
         }
     }
 }

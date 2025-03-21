@@ -1,52 +1,68 @@
-﻿using PsStore.Application.Features.Category.Exceptions;
-using PsStore.Application.Features.Game.Exceptions;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using PsStore.Application.Interfaces.UnitOfWorks;
 using PsStore.Domain.Entities;
 
-namespace PsStore.Application.Features.Game.Rules
+public class GameRules
 {
-    public class GameRules
+    private readonly IUnitOfWork _unitOfWork;
+
+    public GameRules(IUnitOfWork unitOfWork)
     {
-        private readonly IUnitOfWork _unitOfWork;
+        _unitOfWork = unitOfWork;
+    }
 
-        public GameRules(IUnitOfWork unitOfWork)
+    public async Task<Result<Unit>> GameTitleMustBeUnique(string title)
+    {
+        var games = await _unitOfWork.GetReadRepository<Game>().GetAllAsync(
+            predicate: g => g.Title == title);
+
+        if (games.Any())
         {
-            _unitOfWork = unitOfWork;
+            return Result<Unit>.Failure("Game title must be unique.", StatusCodes.Status400BadRequest, "TITLE_ALREADY_EXISTS");
         }
 
-        public async Task GameTitleMustBeUnique(string title)
-        {
-            bool exists = await _unitOfWork.GetReadRepository<Domain.Entities.Game>()
-                .AnyAsync(g => g.Title == title);
+        return Result<Unit>.Success(Unit.Value);
+    }
 
-            if (exists)
-                throw new GameTitleMustBeUniqueException(title);
+    public Task<Result<Unit>> PlatformMustExist(int platformId)
+    {
+        bool exists = Enum.IsDefined(typeof(Platform), platformId);
+
+        if (!exists)
+        {
+            return Task.FromResult(Result<Unit>.Failure(
+                $"Platform with ID {platformId} does not exist.",
+                StatusCodes.Status400BadRequest,
+                "PLATFORM_NOT_FOUND"
+            ));
         }
 
-        public async Task PlatformMustExist(int platformId)
-        {
-            bool exists = Enum.IsDefined(typeof(Platform), platformId);
+        return Task.FromResult(Result<Unit>.Success(Unit.Value));
+    }
 
-            if (!exists)
-                throw new PlatformNotFoundException(platformId);
+    public async Task<Result<Unit>> CategoryMustExist(int categoryId)
+    {
+        var category = await _unitOfWork.GetReadRepository<Category>().GetAsync(c => c.Id == categoryId);
+        if (category == null)
+        {
+            return Result<Unit>.Failure("Category not found.", StatusCodes.Status404NotFound, "CATEGORY_NOT_FOUND");
         }
 
-        public async Task CategoryMustExist(int categoryId)
-        {
-            bool exists = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
-                .AnyAsync(c => c.Id == categoryId);
+        return Result<Unit>.Success(Unit.Value);
+    }
 
-            if (!exists)
-                throw new CategoryNotFoundException(categoryId);
+
+    public async Task<Result<Unit>> GameMustExist(int gameId)
+    {
+        var game = await _unitOfWork.GetReadRepository<Game>().Find(g => g.Id == gameId).FirstOrDefaultAsync();
+
+        if (game == null)
+        {
+            return Result<Unit>.Failure("Game not found.", StatusCodes.Status404NotFound, "GAME_NOT_FOUND");
         }
 
-        public async Task GameMustExist(int gameId)
-        {
-            var gameExists = await _unitOfWork.GetReadRepository<Domain.Entities.Game>().AnyAsync(g => g.Id == gameId);
-            if (!gameExists)
-                throw new GameNotFoundException(gameId);
-        }
-
-
+        return Result<Unit>.Success(Unit.Value);
     }
 }

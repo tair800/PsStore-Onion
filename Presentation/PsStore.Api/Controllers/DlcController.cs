@@ -22,43 +22,78 @@ namespace PsStore.Api.Controllers
         public async Task<IActionResult> Create([FromBody] CreateDlcCommandRequest request)
         {
             var result = await _mediator.Send(request);
-            return CreatedAtAction(nameof(Create), new { id = result }, new { message = "DLC created successfully." });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return StatusCode(StatusCodes.Status201Created, "DLC created successfully.");
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UpdateDlcCommandRequest request)
         {
-            await _mediator.Send(request);
+            var result = await _mediator.Send(request);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
             return Ok(new { message = "DLC updated successfully." });
         }
 
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            await _mediator.Send(new DeleteDlcCommandRequest { Id = id });
+            var result = await _mediator.Send(new DeleteDlcCommandRequest { Id = id });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
             return Ok(new { message = "DLC deleted successfully." });
         }
 
         [HttpPost]
         public async Task<IActionResult> Restore(int id)
         {
-            await _mediator.Send(new RestoreDlcCommandRequest { Id = id });
+            var result = await _mediator.Send(new RestoreDlcCommandRequest { Id = id });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
             return Ok(new { message = "DLC restored successfully." });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
-            var dlcs = await _mediator.Send(new GetAllDlcQueryRequest { IncludeDeleted = includeDeleted });
-            return Ok(dlcs);
+            var result = await _mediator.Send(new GetAllDlcQueryRequest { IncludeDeleted = includeDeleted });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(result.Data);
         }
 
         [HttpGet]
         public async Task<IActionResult> Get(int id, [FromQuery] bool includeDeleted = false)
         {
-            var dlc = await _mediator.Send(new GetDlcByIdQueryRequest { Id = id, IncludeDeleted = includeDeleted });
-            return Ok(dlc);
-        }
+            var result = await _mediator.Send(new GetDlcByIdQueryRequest { Id = id, IncludeDeleted = includeDeleted });
 
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(result.Data);
+        }
     }
 }

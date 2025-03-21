@@ -11,55 +11,89 @@ namespace PsStore.Api.Controllers
     [ApiController]
     public class GameController : ControllerBase
     {
-        private readonly IMediator mediator;
+        private readonly IMediator _mediator;
 
         public GameController(IMediator mediator)
         {
-            this.mediator = mediator;
+            _mediator = mediator;
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(CreateGameCommandRequest request)
         {
-            await mediator.Send(request);
+            var result = await _mediator.Send(request);
 
-            return Ok();
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return StatusCode(StatusCodes.Status201Created, "Game created successfully.");
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromForm] UpdateGameCommandRequest request)
         {
-            await mediator.Send(request);
-            return Ok(new { message = "GAME updated successfully." });
+            var result = await _mediator.Send(request);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(new { message = "Game updated successfully." });
         }
 
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            await mediator.Send(new DeleteGameCommandRequest { Id = id });
-            return Ok(new { message = "GAME deleted successfully." });
+            var result = await _mediator.Send(new DeleteGameCommandRequest { Id = id });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(new { message = "Game deleted successfully." });
         }
 
         [HttpPost]
         public async Task<IActionResult> Restore(int id)
         {
-            await mediator.Send(new RestoreGameCommandRequest { Id = id });
-            return Ok(new { message = "GAME restored successfully." });
+            var result = await _mediator.Send(new RestoreGameCommandRequest { Id = id });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(new { message = "Game restored successfully." });
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
-            var games = await mediator.Send(new GetAllGameQueryRequest { IncludeDeleted = includeDeleted });
-            return Ok(games);
-        }
+            var result = await _mediator.Send(new GetAllGameQueryRequest { IncludeDeleted = includeDeleted });
 
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(result.Data);
+        }
 
         [HttpGet]
         public async Task<IActionResult> Get(int id)
         {
-            var game = await mediator.Send(new GetGameByIdQueryRequest { Id = id });
-            return Ok(game);
+            var result = await _mediator.Send(new GetGameByIdQueryRequest { Id = id });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(result.Data);
         }
     }
 }

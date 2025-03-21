@@ -12,6 +12,7 @@ namespace PsStore.Application.Features.Dlc.Queries.GetAllDlc
         public decimal SalePrice { get; set; }
         public string ImgUrl { get; set; }
         public int GameId { get; set; }
+        public string GameTitle { get; set; }
         public bool IsDeleted { get; set; }
 
         [JsonConverter(typeof(JsonDateTimeConverter))]
