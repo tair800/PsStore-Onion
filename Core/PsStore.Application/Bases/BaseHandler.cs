@@ -12,6 +12,12 @@ namespace PsStore.Application.Bases
         public readonly IHttpContextAccessor httpContextAccessor;
         public readonly string userId;
 
+        public BaseHandler(IMapper mapper, IUnitOfWork unitOfWork)
+        {
+            this.mapper = mapper;
+            this.unitOfWork = unitOfWork;
+        }
+
         public BaseHandler(IMapper mapper, IUnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
         {
             this.mapper = mapper;

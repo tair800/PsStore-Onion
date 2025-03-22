@@ -96,8 +96,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-//  Add Serilog Middleware
-app.UseSerilogRequestLogging(); // Logs HTTP requests
+app.UseSerilogRequestLogging();
 
 var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
 
@@ -120,9 +119,8 @@ app.Use(async (context, next) =>
     }
 });
 
+app.UseAuthentication();
 
-
-// Use Middleware for Global Exception Handling
 app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
