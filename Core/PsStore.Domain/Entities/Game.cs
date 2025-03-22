@@ -28,7 +28,7 @@ namespace PsStore.Domain.Entities
         public Platform Platform { get; set; }
         public ICollection<Dlc>? Dlcs { get; set; } = new List<Dlc>();
         //public ICollection<WishlistGame> WishlistGames { get; set; } = new List<WishlistGame>();
-        //public ICollection<BasketGame> BasketGames { get; set; }
+        public ICollection<BasketGame> BasketGames { get; set; } = new List<BasketGame>();
         //public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Rating>? Ratings { get; set; }
     }
