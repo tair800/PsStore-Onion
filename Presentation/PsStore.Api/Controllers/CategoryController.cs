@@ -14,60 +14,103 @@ namespace PsStore.Api.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly IMediator mediator;
+        private readonly IMediator _mediator;
 
         public CategoryController(IMediator mediator)
         {
-            this.mediator = mediator;
+            _mediator = mediator;
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCategoryCommandRequest request)
         {
-            await mediator.Send(request);
-            return Ok(new { message = "CATEGORY created successfully." });
+            var result = await _mediator.Send(request);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return StatusCode(StatusCodes.Status201Created, new { message = "CATEGORY created successfully." });
         }
 
         [HttpPost]
         public async Task<IActionResult> Restore([FromBody] RestoreCategoryCommandRequest request)
         {
-            await mediator.Send(request);
+            var result = await _mediator.Send(request);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
             return Ok(new { message = "CATEGORY restored successfully." });
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UpdateCategoryCommandRequest request)
         {
-            await mediator.Send(request);
+            var result = await _mediator.Send(request);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
             return Ok(new { message = "CATEGORY updated successfully." });
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromBody] DeleteCategoryCommandRequest request)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
         {
-            await mediator.Send(request);
+            var result = await _mediator.Send(new DeleteCategoryCommandRequest { Id = id });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
             return Ok(new { message = "Category deleted successfully." });
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
-            var response = await mediator.Send(new GetAllCategoriesQueryRequest());
-            return Ok(response);
+            var result = await _mediator.Send(new GetAllCategoriesQueryRequest { IncludeDeleted = includeDeleted });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(result.Data);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetById(int id)
         {
-            var response = await mediator.Send(new GetCategoryByIdQueryRequest { Id = id });
-            return Ok(response);
+            var result = await _mediator.Send(new GetCategoryByIdQueryRequest { Id = id });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(result.Data);
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetWithGames()
+        public async Task<IActionResult> GetCategoriesWithGames()
         {
-            var response = await mediator.Send(new GetCategoriesWithGamesQueryRequest());
-            return Ok(response);
+            var result = await _mediator.Send(new GetCategoriesWithGamesQueryRequest());
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(result.Data);
         }
 
     }

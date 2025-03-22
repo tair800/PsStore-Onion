@@ -1,12 +1,11 @@
 ﻿using MediatR;
-using PsStore.Application.Features.Category.Exceptions;
+using Microsoft.AspNetCore.Http;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
 
 namespace PsStore.Application.Features.Category.Queries.GetCategoryById
 {
-
-    public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQueryRequest, GetCategoryByIdQueryResponse>
+    public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQueryRequest, Result<GetCategoryByIdQueryResponse>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -17,15 +16,19 @@ namespace PsStore.Application.Features.Category.Queries.GetCategoryById
             _mapper = mapper;
         }
 
-        public async Task<GetCategoryByIdQueryResponse> Handle(GetCategoryByIdQueryRequest request, CancellationToken cancellationToken)
+        public async Task<Result<GetCategoryByIdQueryResponse>> Handle(GetCategoryByIdQueryRequest request, CancellationToken cancellationToken)
         {
             var category = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
                 .GetAsync(c => c.Id == request.Id);
 
             if (category == null)
-                throw new CategoryNotFoundException(request.Id);
+            {
+                return Result<GetCategoryByIdQueryResponse>.Failure("Category not found.", StatusCodes.Status404NotFound, "CATEGORY_NOT_FOUND");
+            }
 
-            return _mapper.Map<GetCategoryByIdQueryResponse>(category);
+            var response = _mapper.Map<GetCategoryByIdQueryResponse>(category);
+
+            return Result<GetCategoryByIdQueryResponse>.Success(response);
         }
     }
 }

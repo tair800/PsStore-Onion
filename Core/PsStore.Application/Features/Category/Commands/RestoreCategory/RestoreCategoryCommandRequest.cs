@@ -2,7 +2,7 @@
 
 namespace PsStore.Application.Features.Category.Commands.RestoreCategory
 {
-    public class RestoreCategoryCommandRequest : IRequest<Unit>
+    public class RestoreCategoryCommandRequest : IRequest<Result<Unit>>
     {
         public int Id { get; set; }
     }

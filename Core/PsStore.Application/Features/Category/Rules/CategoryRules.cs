@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PsStore.Application.Features.Category.Exceptions;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using PsStore.Application.Interfaces.UnitOfWorks;
 
 namespace PsStore.Application.Features.Category.Rules
@@ -13,51 +14,41 @@ namespace PsStore.Application.Features.Category.Rules
             _unitOfWork = unitOfWork;
         }
 
-
-        public async Task CategoryMustExist(int categoryId)
+        public Result<Unit> CategoryNameMustBeValid(string name)
         {
-            bool exists = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
-                .AnyAsync(c => c.Id == categoryId && (!c.IsDeleted || c.IsDeleted == null)); // Ensure it's not deleted
-
-            if (!exists)
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new CategoryNotFoundException(categoryId);
+                return Result<Unit>.Failure("Category name cannot be empty.", StatusCodes.Status400BadRequest, "CATEGORY_NAME_EMPTY");
             }
+
+            if (name.Length < 3 || name.Length > 255)
+            {
+                return Result<Unit>.Failure("Category name must be between 3 and 255 characters.", StatusCodes.Status400BadRequest, "CATEGORY_NAME_INVALID_LENGTH");
+            }
+
+            return Result<Unit>.Success(Unit.Value);
         }
 
-
-
-        public async Task CategoryNameMustBeUnique(string categoryName)
+        public async Task<Result<Unit>> CategoryNameMustBeUnique(string name)
         {
-            var existingCategory = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
-                .AnyAsync(c => c.Name == categoryName);
+            var existingCategory = await _unitOfWork.GetReadRepository<Domain.Entities.Category>().Find(c => c.Name == name).FirstOrDefaultAsync();
+            if (existingCategory != null)
+            {
+                return Result<Unit>.Failure("Category name must be unique.", StatusCodes.Status409Conflict, "CATEGORY_NAME_ALREADY_EXISTS");
+            }
 
-            if (existingCategory)
-                throw new CategoryAlreadyExistsException(categoryName);
-
+            return Result<Unit>.Success(Unit.Value);
         }
 
-
-        public async Task CategoryMustHaveAtLeastOneGame(int categoryId)
+        public async Task<Result<Unit>> CategoryMustExist(int categoryId)
         {
-            var category = await _unitOfWork.GetReadRepository<Domain.Entities.Category>()
-                .GetAsync(c => c.Id == categoryId, include: q => q.Include(c => c.Games));
+            var category = await _unitOfWork.GetReadRepository<Domain.Entities.Category>().GetAsync(c => c.Id == categoryId);
+            if (category == null)
+            {
+                return Result<Unit>.Failure("Category not found.", StatusCodes.Status404NotFound, "CATEGORY_NOT_FOUND");
+            }
 
-            if (category == null || category.Games == null || !category.Games.Any())
-                throw new CategoryMustHaveGamesException(categoryId);
-
-        }
-
-
-        public void CategoryNameMustBeValid(string categoryName)
-        {
-            if (string.IsNullOrWhiteSpace(categoryName))
-                throw new ArgumentException("Category name cannot be empty.");
-
-
-            if (categoryName.Length < 3 || categoryName.Length > 100)
-                throw new ArgumentException("Category name must be between 3 and 100 characters.");
-
+            return Result<Unit>.Success(Unit.Value);
         }
     }
 }

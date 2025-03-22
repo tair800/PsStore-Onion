@@ -2,7 +2,7 @@
 
 namespace PsStore.Application.Features.Category.Commands.UpdateCategory
 {
-    public class UpdateCategoryCommandRequest : IRequest<Unit>
+    public class UpdateCategoryCommandRequest : IRequest<Result<Unit>>
     {
         public int Id { get; set; }
         public string Name { get; set; }

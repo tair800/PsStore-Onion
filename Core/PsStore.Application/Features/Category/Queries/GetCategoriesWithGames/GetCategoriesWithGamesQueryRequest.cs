@@ -2,6 +2,6 @@
 
 namespace PsStore.Application.Features.Category.Queries.GetCategoriesWithGames
 {
-    public class GetCategoriesWithGamesQueryRequest : IRequest<List<GetCategoriesWithGamesQueryResponse>> { }
+    public class GetCategoriesWithGamesQueryRequest : IRequest<Result<List<GetCategoriesWithGamesQueryResponse>>> { }
 
 }
