@@ -8,7 +8,7 @@ namespace PsStore.Application.Features.Basket.Commands.AddBasket
         public AddToBasketCommandValidator()
         {
             RuleFor(x => x.UserId).NotEmpty().WithMessage("UserId is required.");
-            RuleFor(x => x.GameId).GreaterThan(0).WithMessage("GameId must be a valid positive integer.");
+            //RuleFor(x => x.GameId).GreaterThan(0).WithMessage("GameId must be a valid positive integer.");
         }
     }
 }

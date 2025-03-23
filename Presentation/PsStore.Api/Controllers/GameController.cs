@@ -34,6 +34,7 @@ namespace PsStore.Api.Controllers
         [HttpPut]
         public async Task<IActionResult> Update([FromForm] UpdateGameCommandRequest request)
         {
+
             var result = await _mediator.Send(request);
 
             if (!result.IsSuccess)

@@ -21,28 +21,65 @@ namespace PsStore.Application.Features.Basket.Commands.Update
         {
             try
             {
-                var basketGame = await _unitOfWork.GetReadRepository<BasketGame>()
-                    .GetAsync(bg => bg.Basket.UserId == request.UserId && bg.GameId == request.GameId);
+                var basket = await _unitOfWork.GetReadRepository<Domain.Entities.Basket>()
+                    .GetAsync(b => b.UserId == request.UserId);
 
-                if (basketGame == null)
+                if (basket == null)
+                {
+                    return Result<Unit>.Failure("Basket not found.", StatusCodes.Status404NotFound, "BASKET_NOT_FOUND");
+                }
+
+                var basketGame = await _unitOfWork.GetReadRepository<BasketGame>()
+                    .GetAsync(bg => bg.BasketId == basket.Id && bg.GameId == request.GameId);
+
+                if (basketGame != null)
+                {
+                    basketGame.Price = request.GamePrice;
+
+                    await _unitOfWork.GetWriteRepository<BasketGame>().UpdateAsync(basketGame);
+                }
+                else
                 {
                     return Result<Unit>.Failure("Game not found in the basket.", StatusCodes.Status404NotFound, "GAME_NOT_FOUND");
                 }
 
-                basketGame.Price = request.Price;
+                if (request.DlcPrices != null && request.DlcPrices.Count > 0)
+                {
+                    foreach (var dlcPrice in request.DlcPrices)
+                    {
+                        var basketDlc = await _unitOfWork.GetReadRepository<BasketDlc>()
+                            .GetAsync(bd => bd.BasketId == basket.Id && bd.DlcId == dlcPrice.DlcId);
 
-                await _unitOfWork.GetWriteRepository<BasketGame>().UpdateAsync(basketGame);
+                        if (basketDlc != null)
+                        {
+                            basketDlc.Price = dlcPrice.Price;
+
+                            await _unitOfWork.GetWriteRepository<BasketDlc>().UpdateAsync(basketDlc);
+                        }
+                        else
+                        {
+                            var newBasketDlc = new BasketDlc
+                            {
+                                BasketId = basket.Id,
+                                DlcId = dlcPrice.DlcId,
+                                Price = dlcPrice.Price
+                            };
+
+                            await _unitOfWork.GetWriteRepository<BasketDlc>().AddAsync(newBasketDlc);
+                        }
+                    }
+                }
+
                 await _unitOfWork.SaveAsync();
 
-                _logger.LogInformation("Successfully updated price for game with ID {GameId} in basket for User {UserId}", request.GameId, request.UserId);
+                _logger.LogInformation("Successfully updated basket for user {UserId}", request.UserId);
                 return Result<Unit>.Success(Unit.Value);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to update game in basket for User {UserId}", request.UserId);
-                return Result<Unit>.Failure("An error occurred while updating the game in the basket.", StatusCodes.Status500InternalServerError, "UPDATE_GAME_FAILED");
+                _logger.LogError(ex, "An error occurred while updating the basket for user {UserId}.", request.UserId);
+                return Result<Unit>.Failure("An error occurred while updating the basket.", StatusCodes.Status500InternalServerError, "BASKET_UPDATE_FAILED");
             }
         }
     }
-
 }

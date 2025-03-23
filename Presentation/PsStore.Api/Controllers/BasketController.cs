@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using PsStore.Application.Features.Basket.Commands.AddToBasket;
 using PsStore.Application.Features.Basket.Commands.Clear;
+using PsStore.Application.Features.Basket.Commands.Remove;
 using PsStore.Application.Features.Basket.Commands.Update;
-using PsStore.Application.Features.Basket.Queries.GetAll;
+using PsStore.Application.Features.Basket.Queries.GetAllBaskets;
 using PsStore.Application.Features.Basket.Queries.GetBasket;
 using System.Security.Claims;
 
@@ -23,6 +24,16 @@ namespace PsStore.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToBasket([FromBody] AddToBasketCommandRequest request)
         {
+            if (request.GameId == 0)
+            {
+                request.GameId = null;
+            }
+
+            if (request.DlcId == 0)
+            {
+                request.DlcId = null;
+            }
+
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (userIdString == null || !Guid.TryParse(userIdString, out var userId))
@@ -39,8 +50,9 @@ namespace PsStore.Api.Controllers
                 return StatusCode(result.StatusCode, result.Error);
             }
 
-            return Ok(new { message = "Game added to the basket successfully." });
+            return Ok(new { message = "Game or DLC added to the basket successfully." });
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetBasket([FromQuery] Guid userId)
@@ -70,6 +82,17 @@ namespace PsStore.Api.Controllers
         [HttpDelete]
         public async Task<IActionResult> RemoveFromBasket([FromBody] RemoveFromBasketCommandRequest request)
         {
+
+            if (request.GameId == 0)
+            {
+                request.GameId = null;
+            }
+
+            if (request.DlcId == 0)
+            {
+                request.DlcId = null;
+            }
+
             var result = await _mediator.Send(request);
 
             if (!result.IsSuccess)
@@ -77,7 +100,7 @@ namespace PsStore.Api.Controllers
                 return StatusCode(result.StatusCode, result.Error);
             }
 
-            return Ok(new { message = "Game removed from the basket successfully." });
+            return Ok(new { message = "Item removed from basket successfully." });
         }
 
         [HttpPut]

@@ -21,26 +21,53 @@ namespace PsStore.Application.Features.Basket.Commands.Remove
         {
             try
             {
-                var basketGame = await _unitOfWork.GetReadRepository<BasketGame>()
-                    .GetAsync(bg => bg.Basket.UserId == request.UserId && bg.GameId == request.GameId);
+                var basket = await _unitOfWork.GetReadRepository<Domain.Entities.Basket>()
+                    .GetAsync(b => b.UserId == request.UserId);
 
-                if (basketGame == null)
+                if (basket == null)
                 {
-                    return Result<Unit>.Failure("Game not found in the basket.", StatusCodes.Status404NotFound, "GAME_NOT_FOUND");
+                    _logger.LogWarning("Basket not found for user {UserId}.", request.UserId);
+                    return Result<Unit>.Failure("Basket not found.", StatusCodes.Status404NotFound, "BASKET_NOT_FOUND");
                 }
 
-                await _unitOfWork.GetWriteRepository<BasketGame>().HardDeleteAsync(basketGame);
+                if (request.GameId.HasValue)
+                {
+                    var basketGame = await _unitOfWork.GetReadRepository<BasketGame>()
+                        .GetAsync(bg => bg.BasketId == basket.Id && bg.GameId == request.GameId.Value);
+
+                    if (basketGame == null)
+                    {
+                        _logger.LogWarning("Game with ID {GameId} not found in basket.", request.GameId.Value);
+                        return Result<Unit>.Failure("Game not found in basket.", StatusCodes.Status404NotFound, "GAME_NOT_IN_BASKET");
+                    }
+
+                    await _unitOfWork.GetWriteRepository<BasketGame>().HardDeleteAsync(basketGame);
+                }
+
+                if (request.DlcId.HasValue)
+                {
+                    var basketDlc = await _unitOfWork.GetReadRepository<BasketDlc>()
+                        .GetAsync(bd => bd.BasketId == basket.Id && bd.DlcId == request.DlcId.Value);
+
+                    if (basketDlc == null)
+                    {
+                        _logger.LogWarning("DLC with ID {DlcId} not found in basket.", request.DlcId.Value);
+                        return Result<Unit>.Failure("DLC not found in basket.", StatusCodes.Status404NotFound, "DLC_NOT_IN_BASKET");
+                    }
+
+                    await _unitOfWork.GetWriteRepository<BasketDlc>().HardDeleteAsync(basketDlc);
+                }
+
                 await _unitOfWork.SaveAsync();
 
-                _logger.LogInformation("Successfully removed game with ID {GameId} from basket for User {UserId}", request.GameId, request.UserId);
+                _logger.LogInformation("Successfully removed items from basket for user {UserId}.", request.UserId);
                 return Result<Unit>.Success(Unit.Value);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to remove game from basket for User {UserId}", request.UserId);
-                return Result<Unit>.Failure("An error occurred while removing the game from the basket.", StatusCodes.Status500InternalServerError, "REMOVE_GAME_FAILED");
+                _logger.LogError(ex, "An error occurred while removing items from the basket for user {UserId}.", request.UserId);
+                return Result<Unit>.Failure("An error occurred while removing items from the basket.", StatusCodes.Status500InternalServerError, "REMOVE_ITEM_FAILED");
             }
         }
     }
-
 }
