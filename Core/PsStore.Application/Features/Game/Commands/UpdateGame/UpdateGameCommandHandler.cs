@@ -42,7 +42,6 @@ public class UpdateGameCommandHandler : BaseHandler, IRequestHandler<UpdateGameC
             return Result<Unit>.Failure("Game not found.", StatusCodes.Status404NotFound, "GAME_NOT_FOUND");
         }
 
-        // Validate CategoryId if provided and not 0
         if (request.CategoryId.HasValue && request.CategoryId.Value != 0)
         {
             var categoryCheckResult = await _gameRules.CategoryMustExist(request.CategoryId.Value);
@@ -56,19 +55,38 @@ public class UpdateGameCommandHandler : BaseHandler, IRequestHandler<UpdateGameC
             _logger.LogInformation("CategoryId is not provided or unchanged, skipping update.");
         }
 
-        _mapper.Map(request, game);
+        if (!string.IsNullOrEmpty(request.Title))
+        {
+            game.Title = request.Title;
+            _unitOfWork.GetWriteRepository<Game>().MarkAsModified(game, g => g.Title);
+        }
 
-        var writeRepo = _unitOfWork.GetWriteRepository<Game>();
+        if (!string.IsNullOrEmpty(request.Description))
+        {
+            game.Description = request.Description;
+            _unitOfWork.GetWriteRepository<Game>().MarkAsModified(game, g => g.Description);
+        }
 
-        if (request.Title is not null) writeRepo.MarkAsModified(game, g => g.Title);
-        if (request.Description is not null) writeRepo.MarkAsModified(game, g => g.Description);
-        if (request.Price is not null) writeRepo.MarkAsModified(game, g => g.Price);
-        if (request.SalePrice is not null) writeRepo.MarkAsModified(game, g => g.SalePrice);
-        if (request.ImgUrl is not null) writeRepo.MarkAsModified(game, g => g.ImgUrl);
-        if (request.CategoryId is not null) writeRepo.MarkAsModified(game, g => g.CategoryId);
+        if (request.Price.HasValue)
+        {
+            game.Price = request.Price.Value;
+            _unitOfWork.GetWriteRepository<Game>().MarkAsModified(game, g => g.Price);
+        }
+
+        if (request.SalePrice.HasValue)
+        {
+            game.SalePrice = request.SalePrice.Value;
+            _unitOfWork.GetWriteRepository<Game>().MarkAsModified(game, g => g.SalePrice);
+        }
+
+        if (!string.IsNullOrEmpty(request.ImgUrl))
+        {
+            game.ImgUrl = request.ImgUrl;
+            _unitOfWork.GetWriteRepository<Game>().MarkAsModified(game, g => g.ImgUrl);
+        }
 
         game.UpdatedDate = DateTime.UtcNow;
-        writeRepo.MarkAsModified(game, g => g.UpdatedDate);
+        _unitOfWork.GetWriteRepository<Game>().MarkAsModified(game, g => g.UpdatedDate);
 
         try
         {
@@ -87,5 +105,6 @@ public class UpdateGameCommandHandler : BaseHandler, IRequestHandler<UpdateGameC
             return Result<Unit>.Failure("Failed to update game.", StatusCodes.Status500InternalServerError, "GAME_UPDATE_FAILED");
         }
     }
+
 
 }

@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using PsStore.Application.Features.Basket.Queries.GetAll;
 using PsStore.Application.Interfaces.UnitOfWorks;
-using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Basket.Queries.GetAllBaskets
 {
@@ -23,8 +21,12 @@ namespace PsStore.Application.Features.Basket.Queries.GetAllBaskets
         {
             try
             {
+                // Get all baskets, including the BasketGames and Game and DLC entities
                 var baskets = await _unitOfWork.GetReadRepository<Domain.Entities.Basket>()
-                    .GetAllAsync(enableTracking: false);
+                    .GetAllAsync(include: query => query
+                        .Include(b => b.BasketGames)
+                        .ThenInclude(bg => bg.Game)
+                        .ThenInclude(g => g.Dlcs), enableTracking: false);
 
                 if (!baskets.Any())
                 {
@@ -32,33 +34,33 @@ namespace PsStore.Application.Features.Basket.Queries.GetAllBaskets
                     return Result<GetAllBasketsCommandResponse>.Failure("No baskets found.", StatusCodes.Status404NotFound, "BASKETS_NOT_FOUND");
                 }
 
-                var basketGames = await _unitOfWork.GetReadRepository<BasketGame>()
-                    .GetAllAsync(bg => baskets.Select(b => b.Id).Contains(bg.BasketId), include: query => query.Include(bg => bg.Game));
-
-                var basketGameResponses = basketGames.Select(bg => new GetAll.GetBasketGameResponse
-                {
-                    BasketId = bg.BasketId,
-                    GameId = bg.GameId,
-                    GameTitle = bg.Game.Title,
-                    Price = bg.Price
-                }).ToList();
-
-
-                var basketsResponse = baskets.Select(basket => new GetBasketResponse
+                // Map the basket data into response DTO
+                var basketResponses = baskets.Select(basket => new GetAllBasketsCommandResponse
                 {
                     UserId = basket.UserId,
                     BasketId = basket.Id,
-                    BasketGames = basketGameResponses.Where(bg => bg.BasketId == basket.Id).ToList(),
-                    TotalPrice = basketGameResponses.Where(bg => bg.BasketId == basket.Id).Sum(bg => bg.Price)
+                    BasketGames = basket.BasketGames.Select(bg => new GetBasketGameResponse
+                    {
+                        GameId = bg.GameId,
+                        GameTitle = bg.Game.Title,
+                        Price = bg.Price,
+                        Dlcs = bg.Game.Dlcs.Select(dlc => new GetBasketDlcResponse
+                        {
+                            DlcId = dlc.Id,
+                            DlcName = dlc.Name,
+                            DlcPrice = dlc.Price
+                        }).ToList()
+                    }).ToList(),
+                    TotalPrice = basket.BasketGames.Sum(bg => bg.Price) + basket.BasketGames
+                        .SelectMany(bg => bg.Game.Dlcs)
+                        .Sum(dlc => dlc.Price)
                 }).ToList();
 
-                var response = new GetAllBasketsCommandResponse
-                {
-                    Baskets = basketsResponse
-                };
-
                 _logger.LogInformation("Successfully retrieved all baskets.");
-                return Result<GetAllBasketsCommandResponse>.Success(response);
+                return Result<GetAllBasketsCommandResponse>.Success(new GetAllBasketsCommandResponse
+                {
+                    Baskets = basketResponses
+                });
             }
             catch (Exception ex)
             {

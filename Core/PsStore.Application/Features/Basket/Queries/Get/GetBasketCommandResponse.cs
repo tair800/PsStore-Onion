@@ -12,5 +12,13 @@
         public int GameId { get; set; }
         public string GameTitle { get; set; }
         public double Price { get; set; }
+        public List<GetBasketDlcResponse> Dlcs { get; set; } = new List<GetBasketDlcResponse>(); // Added Dlc list
+    }
+
+    public class GetBasketDlcResponse
+    {
+        public int DlcId { get; set; }
+        public string DlcName { get; set; }
+        public double DlcPrice { get; set; }
     }
 }
