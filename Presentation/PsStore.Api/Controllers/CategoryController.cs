@@ -10,7 +10,7 @@ using PsStore.Application.Features.Category.Queries.GetCategoryById;
 
 namespace PsStore.Api.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -21,7 +21,7 @@ namespace PsStore.Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] CreateCategoryCommandRequest request)
         {
             var result = await _mediator.Send(request);
@@ -31,10 +31,10 @@ namespace PsStore.Api.Controllers
                 return StatusCode(result.StatusCode, result.Error);
             }
 
-            return StatusCode(StatusCodes.Status201Created, new { message = "CATEGORY created successfully." });
+            return StatusCode(StatusCodes.Status201Created, new { message = "Category created successfully." });
         }
 
-        [HttpPost]
+        [HttpPost("restore")]
         public async Task<IActionResult> Restore([FromBody] RestoreCategoryCommandRequest request)
         {
             var result = await _mediator.Send(request);
@@ -44,10 +44,10 @@ namespace PsStore.Api.Controllers
                 return StatusCode(result.StatusCode, result.Error);
             }
 
-            return Ok(new { message = "CATEGORY restored successfully." });
+            return Ok(new { message = "Category restored successfully." });
         }
 
-        [HttpPut]
+        [HttpPut("update")]
         public async Task<IActionResult> Update([FromBody] UpdateCategoryCommandRequest request)
         {
             var result = await _mediator.Send(request);
@@ -57,10 +57,10 @@ namespace PsStore.Api.Controllers
                 return StatusCode(result.StatusCode, result.Error);
             }
 
-            return Ok(new { message = "CATEGORY updated successfully." });
+            return Ok(new { message = "Category updated successfully." });
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _mediator.Send(new DeleteCategoryCommandRequest { Id = id });
@@ -73,7 +73,7 @@ namespace PsStore.Api.Controllers
             return Ok(new { message = "Category deleted successfully." });
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
             var result = await _mediator.Send(new GetAllCategoriesQueryRequest { IncludeDeleted = includeDeleted });
@@ -86,8 +86,7 @@ namespace PsStore.Api.Controllers
             return Ok(result.Data);
         }
 
-
-        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _mediator.Send(new GetCategoryByIdQueryRequest { Id = id });
@@ -100,7 +99,7 @@ namespace PsStore.Api.Controllers
             return Ok(result.Data);
         }
 
-        [HttpGet]
+        [HttpGet("with-games")]
         public async Task<IActionResult> GetCategoriesWithGames()
         {
             var result = await _mediator.Send(new GetCategoriesWithGamesQueryRequest());
@@ -112,6 +111,5 @@ namespace PsStore.Api.Controllers
 
             return Ok(result.Data);
         }
-
     }
 }

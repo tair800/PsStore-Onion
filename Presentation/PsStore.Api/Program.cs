@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using PsStore.Application;
 using PsStore.Application.Exceptions;
 using PsStore.Application.Features.Category.Rules;
@@ -15,7 +14,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//  Configure Serilog Logging
+// Configure Serilog Logging
 builder.Host.UseSerilog((context, config) =>
 {
     config.ReadFrom.Configuration(context.Configuration)
@@ -62,39 +61,21 @@ builder.Services.AddScoped<ErrorLoggingService>();
 builder.Services.AddScoped<IErrorLoggingService, ErrorLoggingService>();
 builder.Services.AddScoped<CategoryRules>();
 
-
-
-
-//  Configure Swagger with Authentication
-builder.Services.AddSwaggerGen(c =>
+// CORS Configuration
+builder.Services.AddCors(options =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "PS API", Version = "v1", Description = "PS API Swagger client" });
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    options.AddPolicy("AllowReactApp", policy =>
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Type `Bearer` and after space, paste token"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
+        policy.WithOrigins("http://localhost:3000") // React frontend
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
+
+// Apply CORS policy
+app.UseCors("AllowReactApp");
 
 app.UseSerilogRequestLogging();
 
