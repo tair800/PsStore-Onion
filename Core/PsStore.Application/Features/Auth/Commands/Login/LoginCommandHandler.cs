@@ -83,7 +83,8 @@ namespace PsStore.Application.Features.Auth.Commands.Login
             {
                 Token = generatedToken,
                 RefreshToken = refreshToken,
-                Expiration = token.ValidTo
+                Expiration = token.ValidTo,
+                FullName = user.FullName
             });
         }
     }
