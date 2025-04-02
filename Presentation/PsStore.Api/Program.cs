@@ -60,13 +60,15 @@ builder.Services.AddScoped<DlcRules>();
 builder.Services.AddScoped<ErrorLoggingService>();
 builder.Services.AddScoped<IErrorLoggingService, ErrorLoggingService>();
 builder.Services.AddScoped<CategoryRules>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+
 
 // CORS Configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactApp", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // React frontend
+        policy.WithOrigins("http://localhost:5176")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
