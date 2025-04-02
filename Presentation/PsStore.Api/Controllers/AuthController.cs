@@ -1,8 +1,10 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using PsStore.Application.Features.Auth.Commands.ForgotPassword;
 using PsStore.Application.Features.Auth.Commands.Login;
 using PsStore.Application.Features.Auth.Commands.RefreshToken;
 using PsStore.Application.Features.Auth.Commands.Register;
+using PsStore.Application.Features.Auth.Commands.ResetPassword;
 using PsStore.Application.Features.Auth.Revoke;
 using PsStore.Application.Features.Auth.RevokeAll;
 
@@ -77,6 +79,31 @@ namespace PsStore.Api.Controllers
             }
 
             return Ok(new { message = "Successfully revoked refresh tokens for all users." });
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommandRequest request)
+        {
+            var result = await mediator.Send(request);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(new { message = "Password reset link has been sent to your email." });
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommandRequest request)
+        {
+            var result = await mediator.Send(request);
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(new { message = "Password reset successful." });
         }
     }
 }
