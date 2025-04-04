@@ -21,8 +21,4 @@
 		<ProjectReference Include="..\PsStore.Domain\PsStore.Domain.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Features\Auth\Queries\" />
-	</ItemGroup>
-
 </Project>

@@ -25,16 +25,12 @@ namespace PsStore.Application.Features.Auth.Commands.ForgotPassword
                 return Result<ForgotPasswordCommandResponse>.Failure("User not found.", 404, "USER_NOT_FOUND");
             }
 
-            // Generate the token
             var token = await userManager.GeneratePasswordResetTokenAsync(user);
 
-            // Encode the token for use in the URL
             var encodedToken = WebUtility.UrlEncode(token);
 
-            // Construct the reset link (use your frontend URL here)
             var resetUrl = $"http://localhost:3000/reset-password?token={encodedToken}&email={request.Email}";
 
-            // Send email
             var subject = "Reset Password";
             var body = $"<p>To reset your password, click the following link:</p><p><a href=\"{resetUrl}\">{resetUrl}</a></p>";
             await emailService.SendEmailAsync(request.Email, subject, body);

@@ -48,6 +48,7 @@ namespace PsStore.Application.Features.Auth.Commands.Register
                 User user = mapper.Map<User>(request);
                 user.UserName = request.Email;
                 user.SecurityStamp = Guid.NewGuid().ToString();
+                user.CreatedDate = DateTime.UtcNow;
 
                 IdentityResult result = await userManager.CreateAsync(user, request.Password);
 
