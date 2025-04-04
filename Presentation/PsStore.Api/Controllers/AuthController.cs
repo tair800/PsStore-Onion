@@ -82,20 +82,19 @@ namespace PsStore.Api.Controllers
         }
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordCommandRequest request)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordCommandRequest request)
         {
             var result = await mediator.Send(request);
-
             if (!result.IsSuccess)
             {
                 return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
             }
 
-            return Ok(new { message = "Password reset link has been sent to your email." });
+            return Ok(new { message = result.Data.Message });
         }
 
         [HttpPost("reset-password")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordCommandRequest request)
+        public async Task<IActionResult> ResetPassword(ResetPasswordCommandRequest request)
         {
             var result = await mediator.Send(request);
             if (!result.IsSuccess)
@@ -103,7 +102,11 @@ namespace PsStore.Api.Controllers
                 return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
             }
 
-            return Ok(new { message = "Password reset successful." });
+            return Ok(new { message = result.Data.Message });
         }
+
+
+
+
     }
 }

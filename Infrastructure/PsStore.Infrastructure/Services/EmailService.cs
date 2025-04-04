@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using PsStore.Application.Interfaces.Services;
 using System.Net;
 using System.Net.Mail;
@@ -6,10 +8,20 @@ namespace PsStore.Infrastructure.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly string _smtpServer = "smtp.gmail.com"; // Your SMTP server
-        private readonly int _smtpPort = 587;
-        private readonly string _smtpUsername = "tahiraa@code.edu.az";
-        private readonly string _smtpPassword = "cvvj dgpm ojjf qglb";
+        private readonly string _smtpServer;
+        private readonly int _smtpPort;
+        private readonly string _smtpUsername;
+        private readonly string _smtpPassword;
+        private readonly ILogger<EmailService> _logger;
+
+        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        {
+            _smtpServer = configuration["EmailSettings:SmtpServer"];
+            _smtpPort = int.Parse(configuration["EmailSettings:SmtpPort"]);
+            _smtpUsername = configuration["EmailSettings:Username"];
+            _smtpPassword = configuration["EmailSettings:Password"];
+            _logger = logger;
+        }
 
         public async Task<bool> SendEmailAsync(string to, string subject, string body)
         {
@@ -34,8 +46,10 @@ namespace PsStore.Infrastructure.Services
                 await smtpClient.SendMailAsync(mailMessage);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                // Logging the error
+                _logger.LogError(ex, "Error sending email to {Recipient}", to);
                 return false;
             }
         }
