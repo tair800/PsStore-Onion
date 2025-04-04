@@ -5,6 +5,8 @@ using PsStore.Application.Features.Auth.Commands.Login;
 using PsStore.Application.Features.Auth.Commands.RefreshToken;
 using PsStore.Application.Features.Auth.Commands.Register;
 using PsStore.Application.Features.Auth.Commands.ResetPassword;
+using PsStore.Application.Features.Auth.Queries.Get;
+using PsStore.Application.Features.Auth.Queries.GetAll;
 using PsStore.Application.Features.Auth.Revoke;
 using PsStore.Application.Features.Auth.RevokeAll;
 
@@ -105,6 +107,31 @@ namespace PsStore.Api.Controllers
             return Ok(new { message = result.Data.Message });
         }
 
+        [HttpGet("get")]
+        public async Task<IActionResult> GetUser([FromQuery] string email)
+        {
+            var result = await mediator.Send(new GetUserQueryRequest { Email = email });
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(result.Data);
+        }
+
+        [HttpGet("get-all")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var result = await mediator.Send(new GetAllUsersQueryRequest());
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(result.Data);
+        }
 
 
 
