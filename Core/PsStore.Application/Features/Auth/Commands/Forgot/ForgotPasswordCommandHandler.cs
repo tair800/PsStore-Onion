@@ -1,50 +1,48 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using PsStore.Application.Interfaces.Services;
 using PsStore.Domain.Entities;
+using System.Net;
 
 namespace PsStore.Application.Features.Auth.Commands.ForgotPassword
 {
-    public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommandRequest, Result<Unit>>
+    public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommandRequest, Result<ForgotPasswordCommandResponse>>
     {
-        private readonly UserManager<User> _userManager;
-        private readonly IEmailService _emailService;
-        private readonly IConfiguration _configuration;
+        private readonly UserManager<User> userManager;
+        private readonly IEmailService emailService;
 
-        public ForgotPasswordCommandHandler(
-            UserManager<User> userManager,
-            IEmailService emailService,
-            IConfiguration configuration)
+        public ForgotPasswordCommandHandler(UserManager<User> userManager, IEmailService emailService)
         {
-            _userManager = userManager;
-            _emailService = emailService;
-            _configuration = configuration;
+            this.userManager = userManager;
+            this.emailService = emailService;
         }
 
-        public async Task<Result<Unit>> Handle(ForgotPasswordCommandRequest request, CancellationToken cancellationToken)
+        public async Task<Result<ForgotPasswordCommandResponse>> Handle(ForgotPasswordCommandRequest request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return Result<Unit>.Failure("User not found", StatusCodes.Status404NotFound, "USER_NOT_FOUND");
+                return Result<ForgotPasswordCommandResponse>.Failure("User not found.", 404, "USER_NOT_FOUND");
             }
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-            var resetLink = $"{_configuration["AppUrl"]}/reset-password?token={token}";
+            // Generate the token
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
 
-            var emailSubject = "Password Reset Request";
-            var emailBody = $"<p>Click the following link to reset your password:</p><a href='{resetLink}'>Reset Password</a>";
+            // Encode the token for use in the URL
+            var encodedToken = WebUtility.UrlEncode(token);
 
-            var emailSent = await _emailService.SendEmailAsync(user.Email, emailSubject, emailBody);
+            // Construct the reset link (use your frontend URL here)
+            var resetUrl = $"http://localhost:3000/reset-password?token={encodedToken}&email={request.Email}";
 
-            if (!emailSent)
+            // Send email
+            var subject = "Reset Password";
+            var body = $"<p>To reset your password, click the following link:</p><p><a href=\"{resetUrl}\">{resetUrl}</a></p>";
+            await emailService.SendEmailAsync(request.Email, subject, body);
+
+            return Result<ForgotPasswordCommandResponse>.Success(new ForgotPasswordCommandResponse
             {
-                return Result<Unit>.Failure("Failed to send email", StatusCodes.Status500InternalServerError, "EMAIL_SEND_FAILED");
-            }
-
-            return Result<Unit>.Success(Unit.Value);
+                Message = "Password reset link has been sent to your email."
+            });
         }
     }
 }
