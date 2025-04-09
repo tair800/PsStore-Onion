@@ -40,11 +40,11 @@ public class UpdateGameCommandValidator : AbstractValidator<UpdateGameCommandReq
                 .MaximumLength(255).WithMessage("Image URL cannot exceed 255 characters.");
         });
 
-        //When(x => x.CategoryId is not null, () =>
-        //{
-        //    RuleFor(x => x.CategoryId)
-        //        .GreaterThan(0).WithMessage("Category ID must be greater than zero.");
-        //});
+        When(x => x.CategoryId is not null, () =>
+        {
+            RuleFor(x => x.CategoryId)
+                .GreaterThan(0).WithMessage("Category ID must be greater than zero.");
+        });
 
         When(x => x.PlatformId is not null, () =>
         {

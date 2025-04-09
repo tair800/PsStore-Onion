@@ -84,16 +84,19 @@ namespace PsStore.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int id, [FromQuery] bool includeDeleted = false)
         {
-            var result = await _mediator.Send(new GetGameByIdQueryRequest { Id = id });
+            var result = await _mediator.Send(new GetGameByIdQueryRequest
+            {
+                Id = id,
+                IncludeDeleted = includeDeleted
+            });
 
             if (!result.IsSuccess)
-            {
                 return StatusCode(result.StatusCode, result.Error);
-            }
 
             return Ok(result.Data);
         }
+
     }
 }

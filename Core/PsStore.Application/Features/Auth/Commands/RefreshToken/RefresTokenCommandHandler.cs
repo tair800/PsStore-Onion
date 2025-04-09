@@ -7,7 +7,6 @@ using PsStore.Application.Features.Auth.Rules;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.Token;
 using PsStore.Application.Interfaces.UnitOfWorks;
-using PsStore.Domain.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -15,13 +14,13 @@ namespace PsStore.Application.Features.Auth.Commands.RefreshToken
 {
     public class RefresTokenCommandHandler : BaseHandler, IRequestHandler<RefresTokenCommandRequest, Result<RefresTokenCommandResponse>>
     {
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<Domain.Entities.User> userManager;
         private readonly AuthRules authRules;
         private readonly ITokenService tokenService;
         private readonly ILogger<RefresTokenCommandHandler> logger;
 
         public RefresTokenCommandHandler(
-            UserManager<User> userManager,
+            UserManager<Domain.Entities.User> userManager,
             AuthRules authRules,
             ITokenService tokenService,
             IMapper mapper,
@@ -51,7 +50,7 @@ namespace PsStore.Application.Features.Auth.Commands.RefreshToken
                     return Result<RefresTokenCommandResponse>.Failure("Invalid token: Email claim missing.", StatusCodes.Status400BadRequest, "INVALID_TOKEN");
                 }
 
-                User? user = await userManager.FindByEmailAsync(email);
+                Domain.Entities.User? user = await userManager.FindByEmailAsync(email);
                 if (user == null)
                 {
                     logger.LogWarning("Refresh token request failed: User not found for email: {Email}", email);

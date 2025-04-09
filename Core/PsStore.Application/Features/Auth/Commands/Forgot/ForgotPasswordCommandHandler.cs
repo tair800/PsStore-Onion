@@ -1,17 +1,16 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using PsStore.Application.Interfaces.Services;
-using PsStore.Domain.Entities;
 using System.Net;
 
 namespace PsStore.Application.Features.Auth.Commands.ForgotPassword
 {
     public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommandRequest, Result<ForgotPasswordCommandResponse>>
     {
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<Domain.Entities.User> userManager;
         private readonly IEmailService emailService;
 
-        public ForgotPasswordCommandHandler(UserManager<User> userManager, IEmailService emailService)
+        public ForgotPasswordCommandHandler(UserManager<Domain.Entities.User> userManager, IEmailService emailService)
         {
             this.userManager = userManager;
             this.emailService = emailService;

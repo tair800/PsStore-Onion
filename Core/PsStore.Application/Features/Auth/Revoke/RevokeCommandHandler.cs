@@ -6,18 +6,17 @@ using PsStore.Application.Bases;
 using PsStore.Application.Features.Auth.Rules;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
-using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.Revoke
 {
     public class RevokeCommandHandler : BaseHandler, IRequestHandler<RevokeCommandRequest, Result<Unit>>
     {
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<Domain.Entities.User> userManager;
         private readonly AuthRules authRules;
         private readonly ILogger<RevokeCommandHandler> logger;
 
         public RevokeCommandHandler(
-            UserManager<User> userManager,
+            UserManager<Domain.Entities.User> userManager,
             AuthRules authRules,
             IMapper mapper,
             IUnitOfWork unitOfWork,
@@ -35,7 +34,7 @@ namespace PsStore.Application.Features.Auth.Revoke
             {
                 logger.LogInformation("Revoking refresh token for email: {Email}", request.Email);
 
-                User user = await userManager.FindByEmailAsync(request.Email);
+                Domain.Entities.User user = await userManager.FindByEmailAsync(request.Email);
 
                 if (user == null)
                 {

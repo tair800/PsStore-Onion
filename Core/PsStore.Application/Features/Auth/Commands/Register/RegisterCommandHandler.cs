@@ -13,13 +13,13 @@ namespace PsStore.Application.Features.Auth.Commands.Register
     public class RegisterCommandHandler : BaseHandler, IRequestHandler<RegisterCommandRequest, Result<Unit>>
     {
         private readonly AuthRules authRules;
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<Domain.Entities.User> userManager;
         private readonly RoleManager<Role> roleManager;
         private readonly ILogger<RegisterCommandHandler> logger;
 
         public RegisterCommandHandler(
             AuthRules authRules,
-            UserManager<User> userManager,
+            UserManager<Domain.Entities.User> userManager,
             RoleManager<Role> roleManager,
             IMapper mapper,
             IUnitOfWork unitOfWork,
@@ -45,7 +45,7 @@ namespace PsStore.Application.Features.Auth.Commands.Register
                     return Result<Unit>.Failure("User with this email already exists.", StatusCodes.Status400BadRequest, "USER_ALREADY_EXISTS");
                 }
 
-                User user = mapper.Map<User>(request);
+                Domain.Entities.User user = mapper.Map<Domain.Entities.User>(request);
                 user.UserName = request.Email;
                 user.SecurityStamp = Guid.NewGuid().ToString();
                 user.CreatedDate = DateTime.UtcNow;

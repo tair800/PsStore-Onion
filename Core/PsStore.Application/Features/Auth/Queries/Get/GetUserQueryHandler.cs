@@ -2,16 +2,15 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using PsStore.Application.Features.Auth.Queries.Get;
-using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.Queries
 {
     public class GetUserQueryHandler : IRequestHandler<GetUserQueryRequest, Result<GetUserQueryResponse>>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<Domain.Entities.User> _userManager;
         private readonly ILogger<GetUserQueryHandler> _logger;
 
-        public GetUserQueryHandler(UserManager<User> userManager, ILogger<GetUserQueryHandler> logger)
+        public GetUserQueryHandler(UserManager<Domain.Entities.User> userManager, ILogger<GetUserQueryHandler> logger)
         {
             _userManager = userManager;
             _logger = logger;
@@ -19,11 +18,11 @@ namespace PsStore.Application.Features.Auth.Queries
 
         public async Task<Result<GetUserQueryResponse>> Handle(GetUserQueryRequest request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.FindByEmailAsync(request.Email);
+            var user = await _userManager.FindByIdAsync(request.Id);
 
             if (user == null)
             {
-                _logger.LogWarning("User not found with email: {Email}", request.Email);
+                _logger.LogWarning("User not found with Id: {Id}", request.Id);
                 return Result<GetUserQueryResponse>.Failure("User not found.", 404, "USER_NOT_FOUND");
             }
 

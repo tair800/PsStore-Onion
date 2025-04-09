@@ -2,15 +2,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;  // Add this for ToListAsync
 using PsStore.Application.Features.Auth.Queries.GetAll;
-using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.Queries
 {
     public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQueryRequest, Result<List<GetAllUsersQueryResponse>>>
     {
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<Domain.Entities.User> _userManager;
 
-        public GetAllUsersQueryHandler(UserManager<User> userManager)
+        public GetAllUsersQueryHandler(UserManager<Domain.Entities.User> userManager)
         {
             _userManager = userManager;
         }

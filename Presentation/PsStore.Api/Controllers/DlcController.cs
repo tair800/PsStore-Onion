@@ -4,6 +4,7 @@ using PsStore.Application.Features.Dlc.Commands;
 using PsStore.Application.Features.Dlc.Commands.CreateDlc;
 using PsStore.Application.Features.Dlc.Queries.GetAllDlc;
 using PsStore.Application.Features.Dlc.Queries.GetDlcById;
+using PsStore.Application.Features.Game.Queries.GetDlcByGame;
 
 namespace PsStore.Api.Controllers
 {
@@ -95,5 +96,17 @@ namespace PsStore.Api.Controllers
 
             return Ok(result.Data);
         }
+
+        [HttpGet("by-game/{gameId}")]
+        public async Task<IActionResult> GetByGameId(int gameId)
+        {
+            var result = await _mediator.Send(new GetDlcsByGameIdQueryRequest { GameId = gameId });
+
+            if (!result.IsSuccess)
+                return StatusCode(result.StatusCode, result.Error);
+
+            return Ok(result.Data);
+        }
+
     }
 }

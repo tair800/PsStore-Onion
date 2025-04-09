@@ -8,21 +8,20 @@ using PsStore.Application.Features.Auth.Rules;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.Token;
 using PsStore.Application.Interfaces.UnitOfWorks;
-using PsStore.Domain.Entities;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace PsStore.Application.Features.Auth.Commands.Login
 {
     public class LoginCommandHandler : BaseHandler, IRequestHandler<LoginCommandRequest, Result<LoginCommandResponse>>
     {
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<Domain.Entities.User> userManager;
         private readonly IConfiguration configuration;
         private readonly ITokenService tokenService;
         private readonly AuthRules authRules;
         private readonly ILogger<LoginCommandHandler> logger;
 
         public LoginCommandHandler(
-            UserManager<User> userManager,
+            UserManager<Domain.Entities.User> userManager,
             IConfiguration configuration,
             ITokenService tokenService,
             AuthRules authRules,
@@ -43,7 +42,7 @@ namespace PsStore.Application.Features.Auth.Commands.Login
         {
             logger.LogInformation("Login attempt for email: {Email}", request.Email);
 
-            User user = await userManager.FindByEmailAsync(request.Email);
+            Domain.Entities.User user = await userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
                 logger.LogWarning("Invalid login attempt: User not found for email: {Email}", request.Email);
