@@ -6,17 +6,16 @@ using Microsoft.Extensions.Logging;
 using PsStore.Application.Bases;
 using PsStore.Application.Interfaces.AutoMapper;
 using PsStore.Application.Interfaces.UnitOfWorks;
-using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.RevokeAll
 {
     public class RevokeAllCommandHandler : BaseHandler, IRequestHandler<RevokeAllCommandRequest, Result<Unit>>
     {
-        private readonly UserManager<User> userManager;
+        private readonly UserManager<Domain.Entities.User> userManager;
         private readonly ILogger<RevokeAllCommandHandler> logger;
 
         public RevokeAllCommandHandler(
-            UserManager<User> userManager,
+            UserManager<Domain.Entities.User> userManager,
             IMapper mapper,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor,
@@ -32,8 +31,8 @@ namespace PsStore.Application.Features.Auth.RevokeAll
             {
                 logger.LogInformation("Revoking refresh tokens for all users.");
 
-                List<User> users = await userManager.Users.ToListAsync(cancellationToken);
-                foreach (User user in users)
+                List<Domain.Entities.User> users = await userManager.Users.ToListAsync(cancellationToken);
+                foreach (Domain.Entities.User user in users)
                 {
                     user.RefreshToken = null;
                     IdentityResult result = await userManager.UpdateAsync(user);

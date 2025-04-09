@@ -108,9 +108,9 @@ namespace PsStore.Api.Controllers
         }
 
         [HttpGet("get")]
-        public async Task<IActionResult> GetUser([FromQuery] string email)
+        public async Task<IActionResult> GetUser([FromQuery] string id)
         {
-            var result = await mediator.Send(new GetUserQueryRequest { Email = email });
+            var result = await mediator.Send(new GetUserQueryRequest { Id = id });
 
             if (!result.IsSuccess)
             {
@@ -133,7 +133,18 @@ namespace PsStore.Api.Controllers
             return Ok(result.Data);
         }
 
+        [HttpPut("update/{id}")]
+        public async Task<IActionResult> UpdateUser(string id, [FromForm] UpdateUserCommandRequest request)
+        {
+            var result = await mediator.Send(request);
 
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, new { message = result.Error, errorCode = result.ErrorCode });
+            }
+
+            return Ok(new { message = "User updated successfully." });
+        }
 
     }
 }

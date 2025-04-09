@@ -1,13 +1,12 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using PsStore.Application.Bases;
-using PsStore.Domain.Entities;
 
 namespace PsStore.Application.Features.Auth.Rules
 {
     public class AuthRules : BaseRules
     {
-        public Task<Result<Unit>> UserShouldNotBeExist(User? user)
+        public Task<Result<Unit>> UserShouldNotBeExist(Domain.Entities.User? user)
         {
             if (user is not null)
             {
@@ -16,7 +15,7 @@ namespace PsStore.Application.Features.Auth.Rules
             return Task.FromResult(Result<Unit>.Success(Unit.Value));
         }
 
-        public Task<Result<Unit>> EmailOrPasswordShouldntBeInvalidException(User user, bool checkPassword)
+        public Task<Result<Unit>> EmailOrPasswordShouldntBeInvalidException(Domain.Entities.User user, bool checkPassword)
         {
             if (user is null || !checkPassword)
             {
