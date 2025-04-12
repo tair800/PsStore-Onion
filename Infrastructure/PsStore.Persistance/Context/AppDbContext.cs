@@ -20,6 +20,9 @@ namespace PsStore.Persistance.Context
         public DbSet<ErrorLog> ErrorLogs { get; set; }
         public DbSet<Basket> Baskets { get; set; }
         public DbSet<BasketGame> BasketGames { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
+        public DbSet<WishlistItem> WishlistItems { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -9,6 +9,8 @@ using PsStore.Application.Features.Auth.Queries.Get;
 using PsStore.Application.Features.Auth.Queries.GetAll;
 using PsStore.Application.Features.Auth.Revoke;
 using PsStore.Application.Features.Auth.RevokeAll;
+using PsStore.Application.Features.Wishlist.Commands.Clear;
+using System.Security.Claims;
 
 namespace PsStore.Api.Controllers
 {
@@ -136,6 +138,8 @@ namespace PsStore.Api.Controllers
         [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateUser(string id, [FromForm] UpdateUserCommandRequest request)
         {
+            request.UserId = id;
+
             var result = await mediator.Send(request);
 
             if (!result.IsSuccess)
@@ -145,6 +149,32 @@ namespace PsStore.Api.Controllers
 
             return Ok(new { message = "User updated successfully." });
         }
+
+        [HttpDelete("clear")]
+        public async Task<IActionResult> ClearWishlist()
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdString == null || !Guid.TryParse(userIdString, out var userId))
+            {
+                return Unauthorized(new { message = "User not authenticated or invalid userId." });
+            }
+
+            var command = new ClearWishlistCommandRequest
+            {
+                UserId = userId
+            };
+
+            var result = await mediator.Send(command);
+
+            if (!result.IsSuccess)
+            {
+                return StatusCode(result.StatusCode, result.Error);
+            }
+
+            return Ok(new { message = "Wishlist cleared successfully." });
+        }
+
 
     }
 }

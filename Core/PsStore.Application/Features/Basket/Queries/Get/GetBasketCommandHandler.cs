@@ -22,7 +22,6 @@ namespace PsStore.Application.Features.Basket.Queries.GetBasket
         {
             try
             {
-                // Get the user's basket
                 var basket = await _unitOfWork.GetReadRepository<Domain.Entities.Basket>()
                     .GetAsync(b => b.UserId == request.UserId);
 
@@ -32,13 +31,11 @@ namespace PsStore.Application.Features.Basket.Queries.GetBasket
                     return Result<GetBasketCommandResponse>.Failure("Basket not found.", StatusCodes.Status404NotFound, "BASKET_NOT_FOUND");
                 }
 
-                // Get all the basket games for the user, including the Game entity and associated DLCs
                 var basketGames = await _unitOfWork.GetReadRepository<BasketGame>()
                     .GetAllAsync(bg => bg.BasketId == basket.Id, include: query => query
                         .Include(bg => bg.Game)
-                        .ThenInclude(game => game.Dlcs)); // Include DLCs with the Game
+                        .ThenInclude(game => game.Dlcs));
 
-                // Map BasketGame entities to response model, including the DLC information
                 var basketGameResponses = basketGames.Select(bg => new GetBasketGameResponse
                 {
                     GameId = bg.GameId,
@@ -49,13 +46,11 @@ namespace PsStore.Application.Features.Basket.Queries.GetBasket
                         DlcId = d.Id,
                         DlcName = d.Name,
                         DlcPrice = d.Price
-                    }).ToList() // Map DLCs for each game
+                    }).ToList()
                 }).ToList();
 
-                // Calculate the total price of the basket, including games and DLCs
                 var totalPrice = basketGames.Sum(bg => bg.Price) + basketGameResponses.Sum(bg => bg.Dlcs.Sum(d => d.DlcPrice));
 
-                // Prepare the response
                 var response = new GetBasketCommandResponse
                 {
                     UserId = basket.UserId,
