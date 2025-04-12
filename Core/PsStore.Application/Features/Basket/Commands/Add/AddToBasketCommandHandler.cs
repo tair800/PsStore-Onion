@@ -21,7 +21,6 @@ namespace PsStore.Application.Features.Basket.Commands.AddToBasket
         {
             try
             {
-                // Retrieve the user's basket, or create a new one if not found
                 var basket = await _unitOfWork.GetReadRepository<Domain.Entities.Basket>()
                     .GetAsync(b => b.UserId == request.UserId);
 
@@ -38,7 +37,6 @@ namespace PsStore.Application.Features.Basket.Commands.AddToBasket
                     await _unitOfWork.SaveAsync();
                 }
 
-                // Check if a GameId was provided
                 if (request.GameId.HasValue)
                 {
                     var game = await _unitOfWork.GetReadRepository<Domain.Entities.Game>()
@@ -50,7 +48,6 @@ namespace PsStore.Application.Features.Basket.Commands.AddToBasket
                         return Result<Unit>.Failure("Game not found.", StatusCodes.Status404NotFound, "GAME_NOT_FOUND");
                     }
 
-                    // Check if the game is already in the basket
                     var existingBasketGame = await _unitOfWork.GetReadRepository<BasketGame>()
                         .GetAsync(bg => bg.BasketId == basket.Id && bg.GameId == game.Id);
 
@@ -61,19 +58,17 @@ namespace PsStore.Application.Features.Basket.Commands.AddToBasket
                     }
 
 
-                    // Create a new BasketGame entry
                     var basketGame = new BasketGame
                     {
                         BasketId = basket.Id,
                         GameId = game.Id,
-                        Price = game.Price // Price from the game entity
+                        Price = game.Price
                     };
 
                     await _unitOfWork.GetWriteRepository<BasketGame>().AddAsync(basketGame);
-                    basket.BasketGames.Add(basketGame); // Add the game to the basket's list of games
+                    basket.BasketGames.Add(basketGame);
                 }
 
-                // Check if a DlcId was provided
                 if (request.DlcId.HasValue)
                 {
                     var dlc = await _unitOfWork.GetReadRepository<Domain.Entities.Dlc>()
@@ -85,7 +80,6 @@ namespace PsStore.Application.Features.Basket.Commands.AddToBasket
                         return Result<Unit>.Failure("DLC not found.", StatusCodes.Status404NotFound, "DLC_NOT_FOUND");
                     }
 
-                    // Check if the DLC is already in the basket
                     var existingBasketDlc = await _unitOfWork.GetReadRepository<BasketDlc>()
                         .GetAsync(bd => bd.BasketId == basket.Id && bd.DlcId == dlc.Id);
 
@@ -105,19 +99,17 @@ namespace PsStore.Application.Features.Basket.Commands.AddToBasket
                         return Result<Unit>.Failure("Cannot provide both GameId and DlcId. Provide only one.", StatusCodes.Status400BadRequest, "GAME_OR_DLC_CONFLICT");
                     }
 
-                    // Create a new BasketDlc entry
                     var basketDlc = new BasketDlc
                     {
                         BasketId = basket.Id,
                         DlcId = dlc.Id,
-                        Price = dlc.Price // Price from the DLC entity
+                        Price = dlc.Price
                     };
 
                     await _unitOfWork.GetWriteRepository<BasketDlc>().AddAsync(basketDlc);
-                    basket.BasketDlcs.Add(basketDlc); // Add the DLC to the basket's list of DLCs
+                    basket.BasketDlcs.Add(basketDlc);
                 }
 
-                // Save the changes to the basket and its items
                 await _unitOfWork.SaveAsync();
 
                 _logger.LogInformation("Game or DLC added to basket for user {UserId}.", request.UserId);
