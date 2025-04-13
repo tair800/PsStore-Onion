@@ -19,6 +19,7 @@ using PsStore.Application.Features.Game.Commands.CreateGame;
 using PsStore.Application.Features.Game.Dtos;
 using PsStore.Application.Features.Game.Queries.GetAllGame;
 using PsStore.Application.Features.Game.Queries.GetGameById;
+using PsStore.Application.Features.Search.Queries;
 using PsStore.Domain.Entities;
 
 namespace PsStore.Mapper.AutoMapper.Profiles
@@ -76,6 +77,14 @@ namespace PsStore.Mapper.AutoMapper.Profiles
             CreateMap<RefresTokenCommandRequest, User>();
             CreateMap<User, RefresTokenCommandResponse>();
 
+            // Search
+            CreateMap<Game, SearchResult>()
+           .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+           .ForMember(dest => dest.Type, opt => opt.MapFrom(_ => "Game"));
+
+            CreateMap<Dlc, SearchResult>()
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.Type, opt => opt.MapFrom(_ => "DLC"));
 
         }
     }
