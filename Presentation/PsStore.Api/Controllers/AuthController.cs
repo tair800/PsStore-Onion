@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using PsStore.Application.Features.Auth.Commands.ConfirmEmail;
 using PsStore.Application.Features.Auth.Commands.ForgotPassword;
 using PsStore.Application.Features.Auth.Commands.Login;
 using PsStore.Application.Features.Auth.Commands.RefreshToken;
@@ -150,7 +151,7 @@ namespace PsStore.Api.Controllers
             return Ok(new { message = "User updated successfully." });
         }
 
-        [HttpDelete("clear")]
+        [HttpDelete("clear-wishlist")]
         public async Task<IActionResult> ClearWishlist()
         {
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -175,6 +176,20 @@ namespace PsStore.Api.Controllers
             return Ok(new { message = "Wishlist cleared successfully." });
         }
 
+        [HttpGet("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string token)
+        {
+            var result = await mediator.Send(new ConfirmEmailCommandRequest
+            {
+                Email = email,
+                Token = token
+            });
+
+            if (!result.IsSuccess)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
 
     }
 }
