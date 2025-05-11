@@ -49,6 +49,13 @@ namespace PsStore.Application.Features.Auth.Commands.Login
                 return Result<LoginCommandResponse>.Failure("Invalid email or password.", StatusCodes.Status400BadRequest, "INVALID_CREDENTIALS");
             }
 
+            if (!user.EmailConfirmed)
+            {
+                logger.LogWarning("Login attempt blocked: Email not confirmed for user {Email}", user.Email);
+                return Result<LoginCommandResponse>.Failure("Please confirm your email before logging in.", StatusCodes.Status403Forbidden, "EMAIL_NOT_CONFIRMED");
+            }
+
+
             bool checkPassword = await userManager.CheckPasswordAsync(user, request.Password);
             if (!checkPassword)
             {

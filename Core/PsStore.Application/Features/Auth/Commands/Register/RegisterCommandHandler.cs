@@ -5,8 +5,10 @@ using Microsoft.Extensions.Logging;
 using PsStore.Application.Bases;
 using PsStore.Application.Features.Auth.Rules;
 using PsStore.Application.Interfaces.AutoMapper;
+using PsStore.Application.Interfaces.Services;
 using PsStore.Application.Interfaces.UnitOfWorks;
 using PsStore.Domain.Entities;
+using System.Net;
 
 namespace PsStore.Application.Features.Auth.Commands.Register
 {
@@ -16,6 +18,7 @@ namespace PsStore.Application.Features.Auth.Commands.Register
         private readonly UserManager<Domain.Entities.User> userManager;
         private readonly RoleManager<Role> roleManager;
         private readonly ILogger<RegisterCommandHandler> logger;
+        private readonly IEmailService emailService;
 
         public RegisterCommandHandler(
             AuthRules authRules,
@@ -24,12 +27,14 @@ namespace PsStore.Application.Features.Auth.Commands.Register
             IMapper mapper,
             IUnitOfWork unitOfWork,
             IHttpContextAccessor httpContextAccessor,
-            ILogger<RegisterCommandHandler> logger) : base(mapper, unitOfWork, httpContextAccessor)
+            ILogger<RegisterCommandHandler> logger,
+            IEmailService emailService) : base(mapper, unitOfWork, httpContextAccessor)
         {
             this.authRules = authRules;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.logger = logger;
+            this.emailService = emailService;
         }
 
         public async Task<Result<Unit>> Handle(RegisterCommandRequest request, CancellationToken cancellationToken)
@@ -68,7 +73,15 @@ namespace PsStore.Application.Features.Auth.Commands.Register
 
                     await userManager.AddToRoleAsync(user, "user");
 
-                    logger.LogInformation("User {UserId} registered successfully.", user.Id);
+                    var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var encodedToken = WebUtility.UrlEncode(token);
+                    var confirmUrl = $"http://localhost:5000/api/auth/confirm-email?token={encodedToken}&email={user.Email}";
+
+                    var subject = "Confirm Your Email";
+                    var body = $"<p>Click the link to verify your account:</p><p><a href=\"{confirmUrl}\">{confirmUrl}</a></p>";
+                    await emailService.SendEmailAsync(user.Email, subject, body);
+
+                    logger.LogInformation("User {UserId} registered and verification email sent.", user.Id);
                     return Result<Unit>.Success(Unit.Value);
                 }
                 else
